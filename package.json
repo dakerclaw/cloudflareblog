@@ -1,0 +1,14 @@
+{
+  "name": "cloudflare-light-blog",
+  "version": "1.0.0",
+  "description": "基于 Cloudflare Workers + D1 + R2 构建的轻量级博客系统",
+  "main": "src/worker.js",
+  "scripts": {
+    "dev": "npx wrangler dev",
+    "deploy": "npx wrangler deploy"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
