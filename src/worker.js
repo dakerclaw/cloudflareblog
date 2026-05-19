@@ -256,10 +256,13 @@ async function handleAPI(request, env, path) {
       await initDB(env);
       const postCountResult = await env.DB.prepare("SELECT COUNT(*) as cnt FROM posts WHERE status='published'").first();
       const catCountResult = await env.DB.prepare("SELECT COUNT(*) as cnt FROM categories").first();
-      return json({ 
-        postCount: postCountResult?.cnt || 0,
-        catCount: catCountResult?.cnt || 0
-      });
+      console.log('stats result:', postCountResult, catCountResult);
+      const result = { 
+        postCount: postCountResult?.cnt ?? 0,
+        catCount: catCountResult?.cnt ?? 0
+      };
+      console.log('stats returning:', result);
+      return json(result);
     } catch (e) {
       console.error('stats error:', e);
       return json({ postCount: 0, catCount: 0 });
@@ -818,7 +821,8 @@ function getFrontendHTML(settings) {
     }).catch(e=>console.error('加载设置失败',e));
     
     // 加载统计
-    fetch('/api/stats').then(r=>r.json()).then(s=>{
+    fetch('/api/stats').then(r=>{console.log('stats:',r.status);return r.json()}).then(s=>{
+      console.log('stats data:', s);
       document.getElementById('stat-posts').textContent = s.postCount;
       document.getElementById('stat-cats').textContent = s.catCount;
     }).catch(e=>console.error('加载统计失败',e));
