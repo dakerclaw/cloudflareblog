@@ -516,7 +516,7 @@ async function handleFrontend(request, env) {
         }
       }
       
-      return new Response(getPostHTML(post), {
+      return new Response(getPostHTML(post, siteSettings), {
         headers: { 'Content-Type': 'text/html;charset=utf-8' }
       });
     } catch (e) {
@@ -524,7 +524,15 @@ async function handleFrontend(request, env) {
     }
   }
   
-  return new Response(getFrontendHTML(), {
+  // 首页 - 获取设置
+  await initDB(env);
+  let siteSettings = { site_name: '我的博客', site_description: '分享技术，记录生活', site_favicon: '' };
+  try {
+    const { results } = await env.DB.prepare("SELECT * FROM settings").all();
+    results.forEach(s => siteSettings[s.key] = s.value);
+  } catch (e) {}
+  
+  return new Response(getFrontendHTML(siteSettings), {
     headers: { 'Content-Type': 'text/html;charset=utf-8' }
   });
 }
@@ -589,13 +597,18 @@ function getPasswordHTML(post) {
 // ==================== 前端 HTML ====================
 
 // 文章详情页 HTML
-function getPostHTML(post) {
+function getPostHTML(post, settings) {
+  settings = settings || {};
+  const siteName = settings.site_name || '我的博客';
+  const favicon = settings.site_favicon || '';
+  
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${post.title}</title>
+  <title>${post.title} - ${siteName}</title>
+  ${favicon ? `<link rel="icon" href="${favicon}">` : ''}
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
@@ -613,7 +626,7 @@ function getPostHTML(post) {
 </head>
 <body>
   <header>
-    <h1><a href="/">博客</a></h1>
+    <h1><a href="/">${siteName}</a></h1>
   </header>
   <main>
     <article class="post-content">
@@ -628,19 +641,25 @@ function getPostHTML(post) {
     </article>
   </main>
   <footer>
-    &copy; 2026 我的博客. All rights reserved.
+    &copy; 2026 ${siteName}. All rights reserved.
   </footer>
 </body>
 </html>`;
 }
 
-function getFrontendHTML() {
+function getFrontendHTML(settings) {
+  settings = settings || {};
+  const siteName = settings.site_name || '我的博客';
+  const siteDesc = settings.site_description || '';
+  const favicon = settings.site_favicon || '';
+  
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>博客</title>
+  <title>${siteName}</title>
+  ${favicon ? `<link rel="icon" href="${favicon}">` : ''}
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
@@ -663,8 +682,8 @@ function getFrontendHTML() {
 </head>
 <body>
   <header>
-    <h1>我的博客</h1>
-    <p>分享技术，记录生活</p>
+    <h1>${siteName}</h1>
+    ${siteDesc ? `<p>${siteDesc}</p>` : ''}
     <div id="nav-categories" style="margin-top:20px">
       <a href="/" style="color:white;margin:0 10px">全部</a>
     </div>
@@ -972,11 +991,29 @@ function getAdminHTML() {
             <input v-model="settingsForm.site_description" placeholder="网站副标题">
           </div>
           <div class="form-group">
-            <label>网站图标</label>
-            <input type="file" @change="handleFavicon" accept="image/*">
-            <div v-if="settingsForm.site_favicon" style="margin-top:10px">
-              <img :src="settingsForm.site_favicon" style="width:32px;height:32px">
-              <button @click="settingsForm.site_favicon = ''" style="margin-left:10px;color:#dc2626;background:none;border:none;cursor:pointer">删除</button>
+            <label>网站图标（建议 ICO 格式，32x32 或 64x64）</label>
+            <div 
+              class="cover-upload-area"
+              @click="$refs.faviconInput.click()"
+              @dragover.prevent
+              @drop.prevent="handleFaviconDrop"
+              style="border:2px dashed #cbd5e1;border-radius:8px;padding:20px;text-align:center;cursor:pointer;margin-bottom:10px"
+            >
+              <input ref="faviconInput" type="file" @change="handleFavicon" accept=".ico,image/*" style="display:none">
+              <div v-if="!settingsForm.site_favicon">
+                <p style="color:#64748b">点击或拖拽图标到这里（建议 ICO 格式）</p>
+              </div>
+              <img v-else :src="settingsForm.site_favicon" style="width:32px;height:32px">
+            </div>
+            <div v-if="faviconUploading" style="margin-bottom:10px">
+              <div style="background:#e2e8f0;border-radius:4px;height:8px;overflow:hidden">
+                <div :style="{width:faviconProgress+'%',background:'#667eea',height:'100%'}"></div>
+              </div>
+              <p style="font-size:12px;color:#666">上传中... {{ faviconProgress }}%</p>
+            </div>
+            <div v-if="settingsForm.site_favicon" style="display:flex;gap:10px">
+              <button type="button" @click="$refs.faviconInput.click()" style="padding:8px 16px;background:#dbeafe;color:#2563eb;border:none;border-radius:6px;cursor:pointer">更换图标</button>
+              <button type="button" @click="settingsForm.site_favicon = ''" style="padding:8px 16px;background:#fee2e2;color:#dc2626;border:none;border-radius:6px;cursor:pointer">删除图标</button>
             </div>
           </div>
           <button @click="saveSettings" class="btn" style="width:100%;margin-top:20px">保存设置</button>
@@ -1194,6 +1231,8 @@ function getAdminHTML() {
         
         const settingsModal = ref(false);
         const settingsForm = ref({ site_name: '', site_description: '', site_favicon: '' });
+        const faviconUploading = ref(false);
+        const faviconProgress = ref(0);
         
         const openSettingsModal = () => {
           console.log('openSettingsModal clicked', settings.value);
@@ -1213,12 +1252,42 @@ function getAdminHTML() {
         const handleFavicon = async (e) => {
           const file = e.target.files[0];
           if (!file) return;
-          const formData = new FormData();
-          formData.append('file', file);
-          const res = await fetch('/api/upload', { method: 'POST', body: formData });
-          const data = await res.json();
-          if (data.url) {
-            settingsForm.value.site_favicon = data.url;
+          await uploadFavicon(file);
+        };
+        
+        const handleFaviconDrop = async (e) => {
+          const file = e.dataTransfer.files[0];
+          if (file && (file.type.startsWith('image/') || file.name.endsWith('.ico'))) {
+            await uploadFavicon(file);
+          }
+        };
+        
+        const uploadFavicon = async (file) => {
+          faviconUploading.value = true;
+          faviconProgress.value = 0;
+          
+          const progressInterval = setInterval(() => {
+            if (faviconProgress.value < 90) faviconProgress.value += 10;
+          }, 100);
+          
+          try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await fetch('/api/upload', { method: 'POST', body: formData });
+            const data = await res.json();
+            clearInterval(progressInterval);
+            faviconProgress.value = 100;
+            if (data.url) {
+              settingsForm.value.site_favicon = data.url;
+            }
+          } catch (err) {
+            clearInterval(progressInterval);
+            alert('上传失败');
+          } finally {
+            setTimeout(() => {
+              faviconUploading.value = false;
+              faviconProgress.value = 0;
+            }, 500);
           }
         };
         
@@ -1258,7 +1327,7 @@ function getAdminHTML() {
           loadSettings();
         });
         
-        return { logged, password, login, logout, posts, showModal, editingId, form, coverPreview, toast, uploading, uploadProgress, openAdd, openEdit, handleCoverChange, savePost, deletePost, categories, categoryModal, categoryForm, openCategoryModal, saveCategory, deleteCategory, settings, settingsModal, settingsForm, openSettingsModal, saveSettings, handleFavicon };
+        return { logged, password, login, logout, posts, showModal, editingId, form, coverPreview, toast, uploading, uploadProgress, openAdd, openEdit, handleCoverChange, savePost, deletePost, categories, categoryModal, categoryForm, openCategoryModal, saveCategory, deleteCategory, settings, settingsModal, settingsForm, openSettingsModal, saveSettings, handleFavicon, handleFaviconDrop, faviconUploading, faviconProgress };
       }
     }).mount('#app');
   </script>
