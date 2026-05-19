@@ -276,15 +276,23 @@ async function handleAPI(request, env, path) {
     try {
       await initDB(env);
       const links = await env.DB.prepare("SELECT value FROM settings WHERE key='site_links'").first();
-      const linksData = links?.value || '';
-      // 解析简单格式：名称,地址 每行一个
-      const result = linksData.split('\
-').filter(line => line.trim()).map(line => {
-        const parts = line.split(',');
-        return { name: parts[0]?.trim() || '', url: parts[1]?.trim() || '' };
-      }).filter(l => l.name && l.url);
+      const linksData = links && links.value ? links.value : '';
+      if (!linksData) return json([]);
+      const lines = linksData.split('
+');
+      const result = [];
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        const idx = line.indexOf(',');
+        if (idx > 0) {
+          const name = line.substring(0, idx).trim();
+          const url = line.substring(idx + 1).trim();
+          if (name && url) result.push({ name, url });
+        }
+      }
       return json(result);
     } catch (e) {
+      console.error('links error:', e);
       return json([]);
     }
   }
@@ -789,7 +797,7 @@ function getFrontendHTML(settings) {
   <main>
     <aside class="sidebar">
       <div class="profile-card">
-        <img id="profile-avatar" class="avatar" src="" alt="头像">
+        <img id="profile-avatar" class="avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect fill='%23e2e8f0' width='80' height='80'/%3E%3Ctext x='40' y='45' text-anchor='middle' fill='%2394a3b8' font-size='32'%3E?%3C/text%3E%3C/svg%3E" alt="头像">
         <div class="name">${settings.site_author || siteName}</div>
         <div id="profile-bio" class="bio"></div>
         <div class="stats">
@@ -819,6 +827,7 @@ function getFrontendHTML(settings) {
     // 加载博客信息
     fetch('/api/settings').then(r=>r.json()).then(s=>{
       if(s.site_avatar) document.getElementById('profile-avatar').src = s.site_avatar;
+      if(s.site_author) document.querySelector('.profile-card .name').textContent = s.site_author;
       if(s.site_bio) document.getElementById('profile-bio').textContent = s.site_bio;
     }).catch(e=>console.error('加载设置失败',e));
     
@@ -1418,7 +1427,8 @@ function getAdminHTML() {
         const avatarUploading = ref(false);
         const avatarProgress = ref(0);
         
-        const openSettingsModal = () => {
+        const openSettingsModal = async () => {
+          await loadSettings();
           settingsForm.value = { 
             site_name: settings.value.site_name || '',
             site_description: settings.value.site_description || '',
