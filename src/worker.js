@@ -516,7 +516,7 @@ function generateSlug(title) {
 
 // 密码验证页面
 function getPasswordHTML(post) {
-  return \`<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -550,7 +550,7 @@ function getPasswordHTML(post) {
     </script>
   </div>
 </body>
-</html>\`;
+</html>`;
 }
 
 // ==================== 前端 HTML ====================
