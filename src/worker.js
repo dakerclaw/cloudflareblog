@@ -289,7 +289,7 @@ async function handleAPI(request, env, path) {
       await initDB(env);
       const body = await request.json();
       // 转换为简单格式存储
-      const text = Array.isArray(body) ? body.map(l => `${l.name},${l.url}`).join('
+      const text = Array.isArray(body) ? body.map(l => `${l.name},${l.url}`).join('\
 ') : '';
       await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").bind('site_links', text).run();
       return json({ success: true });
