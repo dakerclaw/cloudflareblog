@@ -952,44 +952,61 @@ function getAdminHTML() {
   <title>博客管理后台</title>
   <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
-    .login { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea, #764ba2); }
-    .login-box { background: white; padding: 40px; border-radius: 16px; width: 100%; max-width: 400px; text-align: center; }
-    .login-box h1 { margin-bottom: 20px; color: #333; }
-    .login-box input { width: 100%; padding: 12px; margin-bottom: 16px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; }
-    .login-box button { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
-    .navbar { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
-    .navbar h1 { font-size: 18px; }
-    .navbar button { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+    body { font-family: Nunito, 'Noto Sans SC', sans-serif; background: #f8f8f0; }
+    .login { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #7DC395, #5BAF7A); }
+    .login-box { background: #f7f3df; padding: 40px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; border: 2px solid #e8e0cc; box-shadow: 0 4px 10px rgba(107, 92, 67, 0.42); }
+    .login-box h1 { margin-bottom: 20px; color: #794f27; font-weight: 700; }
+    .login-box input { width: 100%; padding: 12px 18px; margin-bottom: 16px; border: 2.5px solid #c4b89e; border-radius: 50px; font-size: 14px; background: #f8f8f0; color: #725d42; box-shadow: 0 3px 0 0 #d4c9b4; outline: none; transition: all 0.25s; }
+    .login-box input:focus { border-color: #ffcc00; box-shadow: 0 3px 0 0 #e0b800, 0 0 0 3px rgba(255,204,0,0.15); }
+    .login-box button { width: 100%; padding: 14px; background: #19c8b9; color: #fff; border: none; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 5px 0 0 #11a89b; transition: all 0.25s; }
+    .login-box button:hover { transform: translateY(-1px); box-shadow: 0 6px 0 0 #11a89b; }
+    .login-box button:active { transform: translateY(2px); box-shadow: 0 1px 0 0 #11a89b; }
+    .navbar { background: linear-gradient(135deg, #7DC395, #5BAF7A); color: #fff; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .navbar h1 { font-size: 18px; font-weight: 700; }
+    .navbar button { background: rgba(255,255,255,0.2); color: #fff; border: 2px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 50px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+    .navbar button:hover { background: rgba(255,255,255,0.3); }
     .main { max-width: 1200px; margin: 0 auto; padding: 20px; }
     .toolbar { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-    .btn { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; }
-    .btn:hover { background: #5568d3; }
-    table { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    th, td { padding: 16px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-    th { background: #f8fafc; font-weight: 600; }
-    .status { padding: 4px 12px; border-radius: 20px; font-size: 12px; }
-    .status.draft { background: #fef3c7; color: #d97706; }
-    .status.published { background: #dcfce7; color: #16a34a; }
-    .actions button { padding: 6px 12px; margin-right: 8px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
-    .actions .edit { background: #dbeafe; color: #2563eb; }
-    .actions .delete { background: #fee2e2; color: #dc2626; }
-    .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-    .modal-box { background: white; border-radius: 16px; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; }
-    .modal-header { padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
-    .modal-header h2 { font-size: 18px; }
-    .modal-close { width: 32px; height: 32px; border: none; background: #f1f5f9; border-radius: 8px; cursor: pointer; }
+    .toolbar h2 { color: #794f27; font-weight: 700; }
+    .btn { padding: 10px 20px; background: #19c8b9; color: #fff; border: none; border-radius: 50px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 0 0 #11a89b; transition: all 0.25s; }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #11a89b; }
+    .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 0 #11a89b; }
+    .btn-cancel { padding: 10px 20px; background: #f0e8d8; color: #725d42; border: 2px solid #c4b89e; border-radius: 50px; cursor: pointer; font-weight: 600; }
+    table { width: 100%; background: #f7f3df; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 10px rgba(107, 92, 67, 0.42); border: 2px solid #e8e0cc; border-collapse: separate; }
+    th, td { padding: 14px 16px; text-align: left; border-bottom: 2px solid #e8e0cc; color: #725d42; }
+    th { background: #efe7d5; font-weight: 700; color: #794f27; }
+    .status { padding: 4px 14px; border-radius: 50px; font-size: 12px; font-weight: 600; }
+    .status.draft { background: #f5c31c; color: #725d42; }
+    .status.published { background: #6fba2c; color: #fff; }
+    .actions button { padding: 6px 14px; margin-right: 8px; border: none; border-radius: 50px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+    .actions .edit { background: #19c8b9; color: #fff; box-shadow: 0 3px 0 0 #11a89b; }
+    .actions .edit:hover { transform: translateY(-1px); box-shadow: 0 4px 0 0 #11a89b; }
+    .actions .delete { background: #e05a5a; color: #fff; box-shadow: 0 3px 0 0 #c94444; }
+    .actions .delete:hover { transform: translateY(-1px); box-shadow: 0 4px 0 0 #c94444; }
+    .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(107,92,67,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+    .modal-box { background: #f7f3df; border-radius: 20px; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; border: 2px solid #e8e0cc; box-shadow: 0 4px 10px rgba(107, 92, 67, 0.42); }
+    .modal-header { padding: 20px; border-bottom: 2px solid #e8e0cc; display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h2, .modal-header h3 { font-size: 18px; color: #794f27; font-weight: 700; }
+    .modal-close { width: 32px; height: 32px; border: none; background: #e8e0cc; border-radius: 50%; cursor: pointer; font-size: 18px; color: #725d42; transition: all 0.2s; }
+    .modal-close:hover { background: #e05a5a; color: #fff; }
     .modal-body { padding: 20px; }
     .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; margin-bottom: 8px; font-weight: 500; }
-    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; }
-    .form-group textarea { min-height: 200px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #794f27; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 18px; border: 2.5px solid #c4b89e; border-radius: 50px; font-size: 14px; background: #f8f8f0; color: #725d42; font-weight: 500; box-shadow: 0 3px 0 0 #d4c9b4; outline: none; transition: all 0.25s; }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #ffcc00; box-shadow: 0 3px 0 0 #e0b800, 0 0 0 3px rgba(255,204,0,0.15); }
+    .form-group textarea { min-height: 200px; border-radius: 18px; }
+    .form-group select { border-radius: 50px; cursor: pointer; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .modal-footer { padding: 16px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 12px; }
-    .cover-preview { max-width: 200px; margin-top: 10px; }
-    .toast { position: fixed; bottom: 20px; right: 20px; padding: 16px 24px; background: #22c55e; color: white; border-radius: 8px; z-index: 2000; }
+    .modal-footer { padding: 16px 20px; border-top: 2px solid #e8e0cc; display: flex; justify-content: flex-end; gap: 12px; }
+    .cover-preview { max-width: 200px; margin-top: 10px; border-radius: 12px; }
+    .cover-upload-area { border: 2.5px dashed #c4b89e; border-radius: 18px; background: #f0e8d8; }
+    .cover-upload-area:hover { border-color: #19c8b9; background: #e6f9f6; }
+    .toast { position: fixed; bottom: 20px; right: 20px; padding: 16px 24px; background: #6fba2c; color: #fff; border-radius: 50px; z-index: 2000; font-weight: 600; box-shadow: 0 4px 0 0 #5a9e1e; }
   </style>
 </head>
 <body>
