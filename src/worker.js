@@ -655,12 +655,15 @@ function getPasswordHTML(post) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>输入密码</title>
   <style>
-    body { font-family: -apple-system, sans-serif; background: #f5f5f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-    .box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); text-align: center; }
-    h2 { margin-bottom: 20px; }
-    input { padding: 12px; width: 200px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; margin-bottom: 16px; }
-    button { padding: 12px 32px; background: #667eea; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
-    .error { color: #ef4444; margin-top: 10px; }
+    body { font-family: Nunito, 'Noto Sans SC', sans-serif; background: #f8f8f0; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .box { background: #f7f3df; padding: 48px; border-radius: 20px; box-shadow: 0 4px 10px rgba(107, 92, 67, 0.42); text-align: center; border: 2px solid #e8e0cc; }
+    h2 { margin-bottom: 16px; color: #794f27; font-weight: 700; }
+    input { padding: 12px 18px; width: 220px; border: 2.5px solid #c4b89e; border-radius: 50px; font-size: 15px; margin-bottom: 16px; background: #f8f8f0; color: #725d42; font-weight: 500; outline: none; transition: all 0.25s; box-shadow: 0 3px 0 0 #d4c9b4; }
+    input:focus { border-color: #ffcc00; box-shadow: 0 3px 0 0 #e0b800, 0 0 0 3px rgba(255,204,0,0.15); }
+    button { padding: 12px 32px; background: #19c8b9; color: white; border: none; border-radius: 50px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 5px 0 0 #11a89b; transition: all 0.25s; }
+    button:hover { transform: translateY(-1px); box-shadow: 0 6px 0 0 #11a89b; }
+    button:active { transform: translateY(2px); box-shadow: 0 1px 0 0 #11a89b; }
+    .error { color: #e05a5a; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -702,17 +705,21 @@ function getPostHTML(post, settings) {
   ${favicon ? `<link rel="icon" href="${favicon}">` : ''}
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
-    header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; text-align: center; }
-    header h1 { font-size: 1.5em; }
-    header a { color: white; text-decoration: none; }
+    body { font-family: Nunito, 'Noto Sans SC', sans-serif; background: #f8f8f0; color: #725d42; }
+    header { background: linear-gradient(135deg, #7DC395 0%, #5BAF7A 100%); color: #fff; padding: 20px; text-align: center; }
+    header h1 { font-size: 1.5em; font-weight: 700; }
+    header a { color: #fff; text-decoration: none; }
     main { max-width: 800px; margin: 30px auto; padding: 0 20px; }
-    .post-content { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .post-content h1 { font-size: 1.8em; margin-bottom: 20px; }
-    .post-content p { margin: 1em 0; line-height: 1.8; }
-    .post-content img { max-width: 100%; height: auto; margin: 1em 0; }
-    .post-meta { color: #999; font-size: 0.9em; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
-    footer { text-align: center; padding: 30px 20px; color: #999; }
+    .post-article { background: #f7f3df; padding: 36px; border-radius: 20px; box-shadow: 0 4px 10px rgba(107, 92, 67, 0.42); border: 2px solid #e8e0cc; }
+    .post-article h1 { font-size: 1.8em; margin-bottom: 16px; color: #794f27; font-weight: 800; }
+    .post-article p { margin: 0.8em 0; line-height: 1.8; }
+    .post-article img { max-width: 100%; height: auto; margin: 1em 0; border-radius: 12px; }
+    .post-meta { color: #9f927d; font-size: 0.85em; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #e8e0cc; font-weight: 600; }
+    .post-meta span { margin-right: 16px; }
+    .back-link { display: inline-block; margin-bottom: 20px; padding: 8px 20px; background: #19c8b9; color: #fff; text-decoration: none; border-radius: 50px; font-weight: 600; font-size: 0.9em; box-shadow: 0 4px 0 0 #11a89b; transition: all 0.25s; }
+    .back-link:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #11a89b; }
+    .back-link:active { transform: translateY(2px); box-shadow: 0 1px 0 0 #11a89b; }
+    footer { text-align: center; padding: 30px 20px; color: #9f927d; font-size: 0.85em; }
   </style>
 </head>
 <body>
@@ -773,17 +780,17 @@ function getFrontendHTML(settings) {
     .post-card .post-content { flex: 1; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
     
     /* 博客简介卡片 */
-    .profile-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .profile-card .avatar { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; margin: 0 auto 12px; display: block; background: #e2e8f0; }
-    .profile-card .name { font-size: 1.1em; font-weight: bold; text-align: center; margin-bottom: 4px; }
-    .profile-card .bio { color: #666; font-size: 0.85em; text-align: center; margin-bottom: 12px; }
-    .profile-card .stats { display: flex; justify-content: center; gap: 16px; padding-bottom: 12px; border-bottom: 1px solid #eee; margin-bottom: 12px; }
+    .profile-card { background: #f7f3df; border-radius: 20px; padding: 24px; box-shadow: 0 4px 10px rgba(107, 92, 67, 0.42); border: 2px solid #e8e0cc; }
+    .profile-card .avatar { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; margin: 0 auto 14px; display: block; border: 3px solid #c4b89e; background: #e8e0cc; }
+    .profile-card .name { font-size: 1.1em; font-weight: 700; text-align: center; margin-bottom: 4px; color: #794f27; }
+    .profile-card .bio { color: #725d42; font-size: 0.85em; text-align: center; margin-bottom: 14px; font-weight: 500; }
+    .profile-card .stats { display: flex; justify-content: center; gap: 16px; padding-bottom: 14px; border-bottom: 2px solid #e8e0cc; margin-bottom: 14px; }
     .profile-card .stat-item { text-align: center; }
-    .profile-card .stat-num { font-size: 1.1em; font-weight: bold; color: #667eea; }
-    .profile-card .stat-label { font-size: 0.75em; color: #999; }
-    .profile-card h4 { font-size: 0.85em; color: #999; margin: 12px 0 8px; }
-    .profile-card .category-list a, .profile-card .link-list a { display: block; padding: 6px 0; color: #333; text-decoration: none; border-bottom: 1px solid #f5f5f5; font-size: 0.85em; }
-    .profile-card .category-list a:hover, .profile-card .link-list a:hover { color: #667eea; }
+    .profile-card .stat-num { font-size: 1.1em; font-weight: 800; color: #19c8b9; }
+    .profile-card .stat-label { font-size: 0.75em; color: #9f927d; font-weight: 600; }
+    .profile-card h4 { font-size: 0.85em; color: #9f927d; margin: 14px 0 8px; font-weight: 700; letter-spacing: 0.5px; }
+    .profile-card .category-list a, .profile-card .link-list a { display: block; padding: 8px 12px; margin: 0 0 6px 0; color: #725d42; text-decoration: none; background: #f0e8d8; border-radius: 12px; font-size: 0.85em; font-weight: 600; transition: all 0.2s; border: 2px solid transparent; }
+    .profile-card .category-list a:hover, .profile-card .link-list a:hover { background: #e6f9f6; border-color: #19c8b9; color: #11a89b; }
     .profile-card .bio { color: #666; font-size: 0.9em; margin-bottom: 16px; }
     .profile-card .stats { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
     .profile-card .stat-item { text-align: center; }
@@ -837,8 +844,8 @@ function getFrontendHTML(settings) {
       <p style="text-align:center;color:#999;">加载中...</p>
     </div>
   </main>
-  <footer>
-    &copy; 2026 我的博客. All rights reserved.
+  <footer style="text-align:center;padding:30px 20px;color:#9f927d;font-size:0.85em;font-weight:500">
+    &copy; 2026 ${siteName} &bull; Powered by Cloudflare Workers
   </footer>
   <script>
     // 加载博客信息
