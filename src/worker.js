@@ -746,21 +746,22 @@ function getFrontendHTML(settings) {
         }
         const formatDate = (d) => { const dt = new Date(d); return dt.getFullYear() + String(dt.getMonth()+1).padStart(2,'0'); };
         const getExcerpt = (c) => { if(!c) return '...'; return c.substring(0,30) + (c.length > 30 ? '...' : ''); };
-        app.innerHTML = posts.map(post => `
-          <article class="post-card">
-            <div class="post-cover">${post.cover_image ? `<img src="${post.cover_image}" alt="${post.title}">` : `<span style="color:#9f927d">暂无封面</span>`}</div>
-            <div class="post-content">
-              <h2><a href="/post/${formatDate(post.created_at)}/${post.id}">${post.title}</a></h2>
-              <p class="excerpt">${getExcerpt(post.content)}</p>
-              <div class="meta">
-                <span>${post.category}</span>
-                <span>${post.view_count} 阅读</span>
-                <span>${new Date(post.created_at).toLocaleDateString('zh-CN')}</span>
-              </div>
-              <a class="read-more" href="/post/${formatDate(post.created_at)}/${post.id}" target="_blank">阅读更多</a>
-            </div>
-          </article>
-        `).join('');
+        app.innerHTML = posts.map(post => {
+          const cover = post.cover_image ? '<img src="' + post.cover_image + '" alt="' + post.title + '">' : '<span style="color:#9f927d">暂无封面</span>';
+          return '<article class="post-card">' +
+            '<div class="post-cover">' + cover + '</div>' +
+            '<div class="post-content">' +
+              '<h2><a href="/post/' + formatDate(post.created_at) + '/' + post.id + '">' + post.title + '</a></h2>' +
+              '<p class="excerpt">' + getExcerpt(post.content) + '</p>' +
+              '<div class="meta">' +
+                '<span>' + post.category + '</span>' +
+                '<span>' + post.view_count + ' 阅读</span>' +
+                '<span>' + new Date(post.created_at).toLocaleDateString('zh-CN') + '</span>' +
+              '</div>' +
+              '<a class="read-more" href="/post/' + formatDate(post.created_at) + '/' + post.id + '" target="_blank">阅读更多</a>' +
+            '</div>' +
+          '</article>';
+        }).join('');
       } catch(e) {
         console.error('加载文章失败:', e);
         document.getElementById('app').innerHTML = '<p style="text-align:center;color:#e05a5a;">加载失败: ' + e.message + '</p>';
