@@ -978,7 +978,7 @@ function getPostHTML(post, settings) {
           <span>👁 ${post.view_count} 阅读</span>
           <span>📅 ${new Date(post.created_at).toLocaleDateString('zh-CN')}</span>
         </div>
-        <div style="white-space:pre-wrap;word-break:break-word;line-height:1.8">${post.content}</div>
+        <div id="post-content" style="line-height:1.8"></div>
       </article>
     </div>
   </main>
