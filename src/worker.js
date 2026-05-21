@@ -860,7 +860,10 @@ function getPasswordHTML(post) {
       document.querySelector('form').onsubmit = (e) => {
         e.preventDefault();
         const pwd = document.getElementById('pwd').value;
-        window.location.href = '/post/\${new Date(post.created_at).getFullYear()}\${String(post.created_at.getMonth()+1).padStart(2,'0')}/\${post.id}?password=' + encodeURIComponent(pwd);
+        const d = new Date('${post.created_at}');
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        window.location.href = '/post/' + year + month + '/${post.id}?password=' + encodeURIComponent(pwd);
       };
     </script>
   </div>
