@@ -1636,6 +1636,8 @@ function getAdminHTML() {
         <div style="display:flex;gap:12px;justify-content:center">
           <button class="btn btn-cancel" @click="confirmModal.show = false">取消</button>
           <button class="btn" @click="confirmModal.onConfirm()">确认</button>
+        </div>
+      </div>
     </div>
     
     <div v-if="toast" class="toast">{{ toast }}</div>
