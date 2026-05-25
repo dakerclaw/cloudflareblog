@@ -1162,16 +1162,15 @@ function getAdminHTML() {
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #ffcc00; box-shadow: 0 3px 0 0 #e0b800; outline: none; }
     .form-group textarea { border-radius: 18px; min-height: 80px; resize: vertical; }
     .form-group select { 
-      appearance: none; 
-      -webkit-appearance: none; 
-      -moz-appearance: none; 
-      background-color: #f8f8f0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23725d42' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 16px center;
-      padding-right: 40px; 
+      appearance: none !important; 
+      -webkit-appearance: none !important; 
+      -moz-appearance: none !important; 
+      background-color: #f8f8f0 !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23725d42' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
+      background-repeat: no-repeat !important;
+      background-position: right 16px center !important;
+      padding-right: 40px !important; 
       cursor: pointer; 
-      transition: all 0.25s; 
     }
     .form-group select:hover { 
       border-color: #a89878; 
