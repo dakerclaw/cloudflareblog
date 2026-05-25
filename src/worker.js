@@ -1161,8 +1161,21 @@ function getAdminHTML() {
     .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 18px; border: 2.5px solid var(--input-border, #c4b89e); border-radius: 50px; font-size: 14px; background: #f8f8f0; color: var(--text-body, #725d42); box-shadow: 0 3px 0 0 var(--input-shadow, #d4c9b4); font-weight: 500; }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #ffcc00; box-shadow: 0 3px 0 0 #e0b800; outline: none; }
     .form-group textarea { border-radius: 18px; min-height: 80px; resize: vertical; }
-    .form-group select { appearance: none; -webkit-appearance: none; -moz-appearance: none; background: #f8f8f0 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23725d42' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 16px center; padding-right: 40px; cursor: pointer; transition: all 0.25s; }
-    .form-group select:hover { border-color: #a89878; background-color: #f0e8d8; }
+    .form-group select { 
+      appearance: none; 
+      -webkit-appearance: none; 
+      -moz-appearance: none; 
+      background-color: #f8f8f0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23725d42' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px; 
+      cursor: pointer; 
+      transition: all 0.25s; 
+    }
+    .form-group select:hover { 
+      border-color: #a89878; 
+    }
     .form-group select:focus { border-color: #ffcc00; box-shadow: 0 3px 0 0 #e0b800; outline: none; }
     .form-group select option { padding: 10px; background: #f8f8f0; color: #725d42; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
