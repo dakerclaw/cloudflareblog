@@ -1361,8 +1361,6 @@ function getAdminHTML() {
                   <select v-model="settingsForm.site_theme" @change="applyTheme">
                     <option value="animal-forest">🌲 动物森林</option>
                     <option value="ocean-breeze">🌊 海洋微风</option>
-                    <option value="sunset-glow">🌅 日落余晖</option>
-                    <option value="spring-garden">🌸 春日花园</option>
                   </select>
                   <p style="font-size:12px;color:#9f927d;margin-top:4px">选择不同的主题风格，也可自行开发新主题</p>
                 </div>
@@ -1517,40 +1515,6 @@ function getAdminHTML() {
             textSecondary: '#7F8C8D',
             inputBorder: '#B8E6E1',
             inputShadow: '#A0D8D2'
-          },
-          'sunset-glow': {
-            name: '日落余晖',
-            headerBg: 'linear-gradient(180deg, #F39C12 0%, #E74C3C 100%)',
-            sidebarBg: 'linear-gradient(180deg, #F39C12, #E74C3C)',
-            btnBg: '#F39C12',
-            btnShadow: '#D68910',
-            dangerBg: '#E74C3C',
-            dangerShadow: '#C0392B',
-            cardBg: '#FEF9E7',
-            cardBorder: '#F9E79F',
-            bodyBg: '#FEFCF3',
-            textPrimary: '#7B3F00',
-            textBody: '#5D4E37',
-            textSecondary: '#B7950B',
-            inputBorder: '#F9E79F',
-            inputShadow: '#F7DC6F'
-          },
-          'spring-garden': {
-            name: '春日花园',
-            headerBg: 'linear-gradient(180deg, #FF6B9D 0%, #C44569 100%)',
-            sidebarBg: 'linear-gradient(180deg, #FF6B9D, #C44569)',
-            btnBg: '#FF6B9D',
-            btnShadow: '#C44569',
-            dangerBg: '#E74C3C',
-            dangerShadow: '#C0392B',
-            cardBg: '#FFF0F5',
-            cardBorder: '#FFB6C1',
-            bodyBg: '#FFF5F8',
-            textPrimary: '#8B1A4A',
-            textBody: '#5D4E37',
-            textSecondary: '#C44569',
-            inputBorder: '#FFB6C1',
-            inputShadow: '#FF91A4'
           }
         };
 
