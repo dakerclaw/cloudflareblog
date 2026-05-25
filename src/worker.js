@@ -1192,7 +1192,6 @@ function getAdminHTML() {
           <a href="#" :class="{active:currentPage==='posts'}" @click.prevent="currentPage='posts'">📝 文章管理</a>
           <a href="#" :class="{active:currentPage==='new'}" @click.prevent="openAdd()">✏️ 新建文章</a>
           <a href="#" :class="{active:currentPage==='category'}" @click.prevent="currentPage='category'">📂 分类管理</a>
-          <a href="#" :class="{active:currentPage==='profile'}" @click.prevent="currentPage='profile'">👤 个人设置</a>
           <a href="#" :class="{active:currentPage==='trash'}" @click.prevent="currentPage='trash'">🗑️ 回收站</a>
           <a href="#" :class="{active:currentPage==='settings'}" @click.prevent="currentPage='settings'">⚙️ 网站设置</a>
         </div>
@@ -1324,27 +1323,7 @@ function getAdminHTML() {
             </div>
           </div>
         </div>
-        <div v-if="currentPage==='profile'">
-          <div class="page-header"><h2>个人设置</h2></div>
-          <div class="card">
-            <div class="form-group"><label>个人名称</label><input v-model="settingsForm.site_author"></div>
-            <div class="form-group">
-              <label>个人头像</label>
-              <div class="cover-upload" @click="$refs.avatarInput.click()" @dragover.prevent @drop.prevent="handleAvatarDrop" style="padding:16px">
-                <input ref="avatarInput" type="file" @change="handleAvatar" accept="image/*" style="display:none">
-                <div v-if="!settingsForm.site_avatar"><p style="color:#9f927d;font-size:13px">点击或拖拽上传</p></div>
-                <img v-else :src="settingsForm.site_avatar" style="width:64px;height:64px;border-radius:50%">
-              </div>
-              <div v-if="settingsForm.site_avatar" style="display:flex;gap:6px;margin-top:6px">
-                <button @click="$refs.avatarInput.click()" style="flex:1;padding:6px;background:#19c8b9;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px">更换</button>
-                <button @click="settingsForm.site_avatar=''" style="flex:1;padding:6px;background:#e05a5a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px">删除</button>
-              </div>
-            </div>
-            <div class="form-group"><label>个人简介</label><textarea v-model="settingsForm.site_bio" rows="3"></textarea></div>
-            <div class="form-group"><label>友链（名称,地址 每行一个）</label><textarea v-model="settingsForm.site_links" rows="4"></textarea></div>
-            <button class="btn" @click="saveSettings" style="width:100%">保存设置</button>
-          </div>
-        </div>
+
         <div v-if="currentPage==='trash'">
           <div class="page-header"><h2>回收站</h2></div>
           <div v-if="trashPosts.length===0" class="card" style="text-align:center;color:#9f927d">回收站是空的</div>
@@ -1357,24 +1336,49 @@ function getAdminHTML() {
         </div>
         <div v-if="currentPage==='settings'">
           <div class="page-header"><h2>网站设置</h2></div>
-          <div class="card">
-            <div class="form-group"><label>网站标题</label><input v-model="settingsForm.site_name"></div>
-            <div class="form-group"><label>网站副标题</label><input v-model="settingsForm.site_description"></div>
-            <div class="form-group">
-              <label>网站图标（建议ICO格式）</label>
-              <div class="cover-upload" @click="$refs.faviconInput.click()" @dragover.prevent @drop.prevent="handleFaviconDrop" style="padding:16px;border:2px dashed #c4b89e;border-radius:12px;background:#f0e8d8">
-                <input ref="faviconInput" type="file" @change="handleFavicon" accept=".ico,image/*" style="display:none">
-                <div v-if="!settingsForm.site_favicon"><p style="color:#9f927d;font-size:13px">点击或拖拽上传ICO图标</p></div>
-                <img v-else :src="settingsForm.site_favicon" style="width:32px">
-              </div>
-              <div v-if="settingsForm.site_favicon" style="display:flex;gap:6px;margin-top:6px">
-                <button @click="$refs.faviconInput.click()" style="flex:1;padding:6px;background:#19c8b9;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px">更换</button>
-                <button @click="settingsForm.site_favicon=''" style="flex:1;padding:6px;background:#e05a5a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px">删除</button>
+          <div class="editor-layout">
+            <div class="editor-main">
+              <div class="card">
+                <h3 style="color:#794f27;margin-bottom:16px">网站设置</h3>
+                <div class="form-group"><label>网站标题</label><input v-model="settingsForm.site_name"></div>
+                <div class="form-group"><label>网站副标题</label><input v-model="settingsForm.site_description"></div>
+                <div class="form-group">
+                  <label>网站图标（建议ICO格式）</label>
+                  <div class="cover-upload" @click="$refs.faviconInput.click()" @dragover.prevent @drop.prevent="handleFaviconDrop" style="padding:16px;border:2px dashed #c4b89e;border-radius:12px;background:#f0e8d8">
+                    <input ref="faviconInput" type="file" @change="handleFavicon" accept=".ico,image/*" style="display:none">
+                    <div v-if="!settingsForm.site_favicon"><p style="color:#9f927d;font-size:13px">点击或拖拽上传ICO图标</p></div>
+                    <img v-else :src="settingsForm.site_favicon" style="width:32px">
+                  </div>
+                  <div v-if="settingsForm.site_favicon" style="display:flex;gap:6px;margin-top:6px">
+                    <button @click="$refs.faviconInput.click()" style="flex:1;padding:6px;background:#19c8b9;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px">更换</button>
+                    <button @click="settingsForm.site_favicon=''" style="flex:1;padding:6px;background:#e05a5a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px">删除</button>
+                  </div>
+                </div>
+                <div class="form-group"><label>网站页脚（HTML）</label><textarea v-model="settingsForm.site_footer" rows="3"></textarea></div>
+                <div class="form-group"><label>自定义JS</label><textarea v-model="settingsForm.custom_js" rows="4"></textarea></div>
               </div>
             </div>
-            <div class="form-group"><label>网站页脚（HTML）</label><textarea v-model="settingsForm.site_footer" rows="3"></textarea></div>
-            <div class="form-group"><label>自定义JS</label><textarea v-model="settingsForm.custom_js" rows="4"></textarea></div>
-            <button class="btn" @click="saveSettings" style="width:100%">保存设置</button>
+            <div class="editor-side">
+              <div class="card">
+                <h3 style="color:#794f27;margin-bottom:16px">个人设置</h3>
+                <div class="form-group"><label>个人名称</label><input v-model="settingsForm.site_author"></div>
+                <div class="form-group">
+                  <label>个人头像</label>
+                  <div class="cover-upload" @click="$refs.avatarInput.click()" @dragover.prevent @drop.prevent="handleAvatarDrop" style="padding:16px;border:2px dashed #c4b89e;border-radius:12px;background:#f0e8d8">
+                    <input ref="avatarInput" type="file" @change="handleAvatar" accept="image/*" style="display:none">
+                    <div v-if="!settingsForm.site_avatar"><p style="color:#9f927d;font-size:13px">点击或拖拽上传</p></div>
+                    <img v-else :src="settingsForm.site_avatar" style="width:64px;height:64px;border-radius:50%">
+                  </div>
+                  <div v-if="settingsForm.site_avatar" style="display:flex;gap:6px;margin-top:6px">
+                    <button @click="$refs.avatarInput.click()" style="flex:1;padding:6px;background:#19c8b9;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px">更换</button>
+                    <button @click="settingsForm.site_avatar=''" style="flex:1;padding:6px;background:#e05a5a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px">删除</button>
+                  </div>
+                </div>
+                <div class="form-group"><label>个人简介</label><textarea v-model="settingsForm.site_bio" rows="3"></textarea></div>
+                <div class="form-group"><label>友链（名称,地址 每行一个）</label><textarea v-model="settingsForm.site_links" rows="4"></textarea></div>
+                <button class="btn" @click="saveSettings" style="width:100%;margin-top:16px">保存所有设置</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
