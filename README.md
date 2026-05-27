@@ -8,42 +8,58 @@
 - ✅ 文章分类
 - ✅ 文章封面图片（支持 R2 对象存储）
 - ✅ 前台文章列表和详情页
+- ✅ **分页支持**（文章列表自动分页）
 - ✅ 浏览次数统计
 - ✅ 自动数据库初始化（D1）
-- ✅ 管理员密码保护
+- ✅ 管理员密码保护（HMAC + 24小时过期）
+- ✅ **SEO 优化**（meta 标签、Open Graph、sitemap.xml）
+- ✅ **页面缓存**（Workers Cache API）
+- ✅ **模块化代码结构**
+- ✅ 主题切换（动物森林 / 海洋微风）
 
 ## 技术栈
 
-- **运行时**: Cloudflare Workers
+- **运行时**: Cloudflare Workers (ES Modules)
 - **数据库**: Cloudflare D1
 - **对象存储**: Cloudflare R2（可选）
 - **前端**: 原生 HTML + Vue 3
+- **部署**: GitHub → Cloudflare Workers 自动部署
 
-## 部署步骤
+## 项目结构
 
-### 1. 克隆项目
-
-```bash
-git clone https://github.com/your-username/cloudflare-light-blog.git
-cd cloudflare-light-blog
-npm install
+```
+src/
+├── worker.js              # 主入口（路由分发）
+├── api.js                 # API 处理（分页、错误处理）
+├── lib/
+│   ├── utils.js           # 工具函数
+│   ├── db.js              # 数据库初始化
+│   ├── auth.js            # HMAC 认证
+│   ├── cache.js           # Workers Cache API
+│   └── image.js           # 图片处理
+└── views/
+    ├── frontend.js        # 前台首页
+    ├── post.js            # 文章详情页
+    ├── password.js        # 密码验证页
+    └── admin.js           # 后台管理页
+wrangler.toml              # Cloudflare 配置
 ```
 
-### 2. 创建 D1 数据库
+## 部署步骤（GitHub 自动部署）
+
+### 1. 创建 D1 数据库
 
 1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com)
 2. 进入 **Workers & Pages** → **D1**
-3. 点击 **Create database**
-4. 输入名称 `blog-db`，点击 Create
-5. 点击数据库进入详情页，复制 **Database ID**
+3. 点击 **Create database**，名称输入 `blog-db`
+4. 复制 **Database ID**
 
-### 3. 创建 R2 存储桶（可选）
+### 2. 创建 R2 存储桶（可选）
 
 1. 进入 **Workers & Pages** → **R2**
-2. 点击 **Create bucket**
-3. 输入名称 `blog-images`，点击 Create
+2. 点击 **Create bucket**，名称输入 `blog-images`
 
-### 4. 修改 wrangler.toml
+### 3. 修改 wrangler.toml
 
 编辑 `wrangler.toml`，填入你的 D1 Database ID：
 
@@ -51,80 +67,73 @@ npm install
 [[d1_databases]]
 binding = "DB"
 database_name = "blog-db"
-database_id = "你的-D1-Database-ID"  # 替换为你的 ID
-
-# 如果使用 R2，取消注释：
-# [[r2_buckets]]
-# binding = "R2"
-# bucket_name = "blog-images"
+database_id = "你的-D1-Database-ID"
 ```
 
-### 5. 设置环境变量
-
-在 Worker 的 **Settings → Variables** 中添加：
-
-| 变量名 | 说明 |
-|--------|------|
-| ADMIN_PASSWORD | 管理员密码 |
-
-### 6. 部署
+### 4. 推送到 GitHub
 
 ```bash
-# 本地测试
-npm run dev
-
-# 推送到 GitHub（会自动部署）
+git init
 git add .
-git commit -m "Init"
-git push origin main
+git commit -m "Init blog"
+git remote add origin https://github.com/你的用户名/cloudflare-light-blog.git
+git push -u origin main
 ```
 
-## GitHub 部署说明
+### 5. 连接 Cloudflare Workers
 
-### 绑定 GitHub 仓库
-
-1. Cloudflare Dashboard → Workers & Pages → Create Application
+1. Cloudflare Dashboard → **Workers & Pages** → **Create Application**
 2. 选择 **Workers** → **Connect to Git**
-3. 选择你的仓库
+3. 选择你的 GitHub 仓库
+4. Cloudflare 会自动读取 `wrangler.toml` 配置并部署
 
-### 配置部署
+### 6. 设置管理员密码
 
-在 GitHub 仓库的 Settings 中配置：
+部署完成后，在 Worker 的 **Settings → Variables and Secrets** 中添加：
 
-1. **Build settings**:
-   - Build command: （留空）
-   - Build output directory: （留空）
-   - Deploy command: `npx wrangler deploy`
+| 变量名 | 类型 | 说明 |
+|--------|------|------|
+| ADMIN_PASSWORD | Secret | 管理员密码 |
 
-2. **环境变量**（可选，用于 CI/CD）:
-   - `D1_DATABASE_ID`: 你的 D1 数据库 ID
+> ⚠️ 请使用 **Secret** 类型而非普通变量，确保密码加密存储。
 
-### 为什么 wrangler.toml 需要配置绑定？
+### 7. 后续更新
 
-每次从 GitHub 部署时，Cloudflare 会使用 `wrangler.toml` 中的配置来更新 Worker。必须在配置文件中声明 D1 和 R2 绑定，部署后绑定才不会丢失。
+每次推送到 GitHub `main` 分支，Cloudflare 会自动重新部署：
+
+```bash
+git add .
+git commit -m "Update"
+git push
+```
 
 ## 访问
 
 - 前台: `https://你的域名/`
 - 后台: `https://你的域名/admin/`
+- 站点地图: `https://你的域名/sitemap.xml`
 
-## 本地开发
+## API 接口
 
-```bash
-# 复制环境变量文件
-cp .dev.vars.example .dev.vars
+### 公开接口
 
-# 编辑 .dev.vars 填入密码
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/posts?page=1&limit=10` | 文章列表（分页） |
+| GET | `/api/post/?slug=xxx` | 文章详情 |
+| GET | `/api/categories` | 分类列表 |
+| GET | `/api/settings` | 网站设置 |
+| GET | `/api/stats` | 统计信息 |
+| GET | `/sitemap.xml` | 站点地图 |
 
-# 启动开发服务器
-npm run dev
-```
+### 管理接口（需要 Bearer Token）
 
-## 注意事项
-
-- 首次部署时会自动创建数据库表（D1）
-- 图片上传需要配置 R2 存储（可选，不配置则使用 base64 编码）
-- 必须设置 ADMIN_PASSWORD 保护后台安全
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/login` | 登录获取 Token |
+| POST | `/api/admin/post` | 创建文章 |
+| PUT | `/api/admin/post?id=x` | 更新文章 |
+| DELETE | `/api/admin/post?id=x` | 删除文章 |
 
 ## License
 

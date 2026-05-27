@@ -1,0 +1,411 @@
+// ==================== API 处理模块（分页 + 错误处理）====================
+
+import { json, errorResponse, generateSlug } from './lib/utils.js';
+import { generateToken, verifyToken, authenticateRequest } from './lib/auth.js';
+import { initDB, getSettings, saveSettings } from './lib/db.js';
+import { handleUpload } from './lib/image.js';
+
+/**
+ * 处理所有 API 请求
+ */
+export async function handleAPI(request, env, path) {
+  const method = request.method;
+
+  try {
+    // ========== 登录接口 ==========
+    if (path === '/api/login' && method === 'POST') {
+      const body = await request.json();
+      if (!env.ADMIN_PASSWORD) {
+        return json({ success: true, token: 'no-auth' });
+      }
+      if (body.password === env.ADMIN_PASSWORD) {
+        const token = await generateToken(env.ADMIN_PASSWORD);
+        return json({ success: true, token });
+      }
+      return json({ success: false, error: '密码错误' }, 401);
+    }
+
+    // ========== Sitemap ==========
+    if (path === '/sitemap.xml' && method === 'GET') {
+      return handleSitemap(request, env);
+    }
+
+    // ========== 公开 API（不需要认证）==========
+    if (path === '/api/posts' && method === 'GET') {
+      return handleGetPosts(request, env);
+    }
+    if (path === '/api/post/' && method === 'GET') {
+      return handleGetPost(request, env);
+    }
+    if (path === '/api/categories' && method === 'GET') {
+      return handleGetCategories(env);
+    }
+    if (path === '/api/settings' && method === 'GET') {
+      return handleGetSettings(env);
+    }
+    if (path === '/api/stats' && method === 'GET') {
+      return handleGetStats(env);
+    }
+    if (path === '/api/links' && method === 'GET') {
+      return handleGetLinks(env);
+    }
+    if (path === '/api/upload' && method === 'POST') {
+      return handleUploadAPI(request, env);
+    }
+
+    // ========== 认证检查（以下 API 需要管理员权限）==========
+    const isAuthed = await authenticateRequest(request, env);
+    if (!isAuthed) {
+      return errorResponse('未授权', 401);
+    }
+
+    // ========== 管理 API ==========
+    if (path === '/api/admin/posts' && method === 'GET') {
+      return handleAdminGetPosts(env);
+    }
+    if (path === '/api/admin/post' && method === 'POST') {
+      return handleCreatePost(request, env);
+    }
+    if (path === '/api/admin/post' && method === 'PUT') {
+      return handleUpdatePost(request, env);
+    }
+    if (path === '/api/admin/post' && method === 'DELETE') {
+      return handleDeletePost(request, env);
+    }
+    if (path === '/api/admin/trash' && method === 'GET') {
+      return handleGetTrash(env);
+    }
+    if (path === '/api/admin/restore' && method === 'POST') {
+      return handleRestorePost(request, env);
+    }
+    if (path === '/api/admin/permanent-delete' && method === 'POST') {
+      return handlePermanentDelete(request, env);
+    }
+    if (path === '/api/admin/empty-trash' && method === 'POST') {
+      return handleEmptyTrash(env);
+    }
+
+    // 分类管理
+    if (path === '/api/category' && method === 'POST') {
+      return handleSaveCategory(request, env);
+    }
+    if (path.startsWith('/api/category') && method === 'DELETE') {
+      return handleDeleteCategory(request, env);
+    }
+
+    // 友链管理
+    if (path === '/api/links' && method === 'POST') {
+      return handleSaveLinks(request, env);
+    }
+
+    // 设置管理
+    if (path === '/api/settings' && method === 'POST') {
+      return handleSaveSettings(request, env);
+    }
+
+    return errorResponse('未找到接口', 404);
+  } catch (e) {
+    return errorResponse('服务器错误', 500, e);
+  }
+}
+
+// ==================== 公开 API 实现 ====================
+
+/**
+ * 获取文章列表（支持分页 + 分类筛选）
+ */
+async function handleGetPosts(request, env) {
+  const url = new URL(request.url);
+  const category = url.searchParams.get('category');
+  const page = Math.max(1, parseInt(url.searchParams.get('page')) || 1);
+  const limit = Math.min(50, Math.max(1, parseInt(url.searchParams.get('limit')) || 10));
+  const offset = (page - 1) * limit;
+
+  let where = "WHERE status='published'";
+  const params = [];
+
+  if (category) {
+    const catResult = await env.DB.prepare(
+      "SELECT name FROM categories WHERE slug=?"
+    ).bind(category).first();
+    const catName = catResult ? catResult.name : category;
+    where += " AND category=?";
+    params.push(catName);
+  }
+
+  // 获取总数
+  const countResult = await env.DB.prepare(
+    `SELECT COUNT(*) as total FROM posts ${where}`
+  ).bind(...params).first();
+  const total = countResult?.total || 0;
+
+  // 获取分页数据
+  const { results } = await env.DB.prepare(
+    `SELECT id, title, slug, excerpt, cover_image, category, tags, view_count, created_at, password FROM posts ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`
+  ).bind(...params, limit, offset).all();
+
+  return json({
+    data: results,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit)
+    }
+  });
+}
+
+/**
+ * 获取单篇文章
+ */
+async function handleGetPost(request, env) {
+  const slug = new URL(request.url).searchParams.get('slug');
+  if (!slug) return errorResponse('缺少 slug', 400);
+
+  const post = await env.DB.prepare(
+    "SELECT * FROM posts WHERE slug=? AND status='published'"
+  ).bind(slug).first();
+
+  if (!post) return errorResponse('文章不存在', 404);
+
+  // 异步更新浏览次数（不阻塞响应）
+  env.DB.prepare("UPDATE posts SET view_count = view_count + 1 WHERE id=?").bind(post.id).run();
+
+  return json(post);
+}
+
+/**
+ * 获取分类列表
+ */
+async function handleGetCategories(env) {
+  const { results } = await env.DB.prepare("SELECT * FROM categories ORDER BY name").all();
+  return json(results || []);
+}
+
+/**
+ * 获取网站设置
+ */
+async function handleGetSettings(env) {
+  const settings = await getSettings(env);
+  return json(settings);
+}
+
+/**
+ * 获取统计信息
+ */
+async function handleGetStats(env) {
+  const [postCount, catCount] = await Promise.all([
+    env.DB.prepare("SELECT COUNT(*) as cnt FROM posts WHERE status='published'").first(),
+    env.DB.prepare("SELECT COUNT(*) as cnt FROM categories").first()
+  ]);
+  return json({
+    postCount: postCount?.cnt ?? 0,
+    catCount: catCount?.cnt ?? 0
+  });
+}
+
+/**
+ * 获取友链列表
+ */
+async function handleGetLinks(env) {
+  const links = await env.DB.prepare("SELECT value FROM settings WHERE key='site_links'").first();
+  const linksData = links?.value || '';
+  if (!linksData) return json([]);
+
+  const result = linksData.split('\n').reduce((acc, line) => {
+    const idx = line.indexOf(',');
+    if (idx > 0) {
+      const name = line.substring(0, idx).trim();
+      const url = line.substring(idx + 1).trim();
+      if (name && url) acc.push({ name, url });
+    }
+    return acc;
+  }, []);
+
+  return json(result);
+}
+
+/**
+ * 图片上传
+ */
+async function handleUploadAPI(request, env) {
+  const result = await handleUpload(request, env);
+  if (result.error) {
+    return json({ error: result.error }, result.status || 500);
+  }
+  return json(result);
+}
+
+/**
+ * 生成 Sitemap
+ */
+async function handleSitemap(request, env) {
+  const url = new URL(request.url);
+  const baseUrl = `${url.protocol}//${url.host}`;
+
+  const { results } = await env.DB.prepare(
+    "SELECT slug, updated_at FROM posts WHERE status='published' ORDER BY updated_at DESC"
+  ).all();
+
+  const urls = results.map(p => `  <url>
+    <loc>${baseUrl}/post/${p.slug}</loc>
+    <lastmod>${p.updated_at}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`).join('\n');
+
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${baseUrl}/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+${urls}
+</urlset>`;
+
+  return new Response(sitemap, {
+    headers: { 'Content-Type': 'application/xml; charset=utf-8' }
+  });
+}
+
+// ==================== 管理 API 实现 ====================
+
+async function handleAdminGetPosts(env) {
+  const { results } = await env.DB.prepare(
+    "SELECT * FROM posts WHERE status != 'trash' ORDER BY created_at DESC"
+  ).all();
+  return json(results || []);
+}
+
+async function handleCreatePost(request, env) {
+  const body = await request.json();
+  const slug = body.slug || generateSlug(body.title);
+
+  let coverImage = body.cover_image;
+  if (coverImage && coverImage.startsWith('data:')) {
+    const { uploadImage } = await import('./lib/image.js');
+    coverImage = await uploadImage(env, coverImage, slug);
+  }
+
+  const now = new Date().toISOString();
+  const published_at = body.published_at ? new Date(body.published_at).toISOString() : now;
+
+  const result = await env.DB.prepare(`
+    INSERT INTO posts (title, slug, content, excerpt, cover_image, category, tags, status, password, created_at, updated_at, published_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    body.title,
+    slug,
+    body.content,
+    body.excerpt || (body.content ? body.content.substring(0, 200) : ''),
+    coverImage || '',
+    body.category || '未分类',
+    body.tags || '',
+    body.status || 'draft',
+    body.password || '',
+    now,
+    now,
+    published_at
+  ).run();
+
+  return json({ success: true, id: result.meta?.last_row_id });
+}
+
+async function handleUpdatePost(request, env) {
+  const id = new URL(request.url).searchParams.get('id');
+  if (!id) return errorResponse('缺少 id', 400);
+
+  const body = await request.json();
+  let coverImage = body.cover_image;
+  if (coverImage && coverImage.startsWith('data:')) {
+    const { uploadImage } = await import('./lib/image.js');
+    coverImage = await uploadImage(env, coverImage, id);
+  }
+
+  const now = new Date().toISOString();
+  const published_at = body.published_at ? new Date(body.published_at).toISOString() : now;
+
+  await env.DB.prepare(`
+    UPDATE posts SET title=?, content=?, excerpt=?, cover_image=?, category=?, tags=?, status=?, password=?, updated_at=?, published_at=? WHERE id=?
+  `).bind(
+    body.title,
+    body.content,
+    body.excerpt || (body.content ? body.content.substring(0, 200) : ''),
+    coverImage || body.cover_image || '',
+    body.category || '未分类',
+    body.tags || '',
+    body.status || 'draft',
+    body.password || '',
+    now,
+    published_at,
+    id
+  ).run();
+
+  return json({ success: true });
+}
+
+async function handleDeletePost(request, env) {
+  const id = new URL(request.url).searchParams.get('id');
+  if (!id) return errorResponse('缺少 id', 400);
+
+  await env.DB.prepare("UPDATE posts SET status='trash' WHERE id=?").bind(id).run();
+  return json({ success: true });
+}
+
+async function handleGetTrash(env) {
+  const { results } = await env.DB.prepare(
+    "SELECT * FROM posts WHERE status='trash' ORDER BY created_at DESC"
+  ).all();
+  return json(results || []);
+}
+
+async function handleRestorePost(request, env) {
+  const body = await request.json();
+  await env.DB.prepare("UPDATE posts SET status='draft' WHERE id=?").bind(body.id).run();
+  return json({ success: true });
+}
+
+async function handlePermanentDelete(request, env) {
+  const body = await request.json();
+  await env.DB.prepare("DELETE FROM posts WHERE id=? AND status='trash'").bind(body.id).run();
+  return json({ success: true });
+}
+
+async function handleEmptyTrash(env) {
+  await env.DB.prepare("DELETE FROM posts WHERE status='trash'").run();
+  return json({ success: true });
+}
+
+async function handleSaveCategory(request, env) {
+  const body = await request.json();
+  if (body.id) {
+    await env.DB.prepare("UPDATE categories SET name=?, slug=?, description=? WHERE id=?")
+      .bind(body.name, body.slug, body.description || '', body.id).run();
+  } else {
+    await env.DB.prepare("INSERT INTO categories (name, slug, description) VALUES (?, ?, ?)")
+      .bind(body.name, body.slug, body.description || '').run();
+  }
+  return json({ success: true });
+}
+
+async function handleDeleteCategory(request, env) {
+  const id = new URL(request.url).searchParams.get('id');
+  if (!id) return errorResponse('缺少 id', 400);
+  await env.DB.prepare("DELETE FROM categories WHERE id=?").bind(id).run();
+  return json({ success: true });
+}
+
+async function handleSaveLinks(request, env) {
+  const body = await request.json();
+  const text = Array.isArray(body) ? body.map(l => `${l.name},${l.url}`).join('\n') : '';
+  await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)")
+    .bind('site_links', text).run();
+  return json({ success: true });
+}
+
+async function handleSaveSettings(request, env) {
+  const body = await request.json();
+  await saveSettings(env, body);
+  return json({ success: true });
+}
