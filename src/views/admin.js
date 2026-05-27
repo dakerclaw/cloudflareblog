@@ -443,9 +443,19 @@ export function getAdminHTML() {
         const editingCategory = ref(null);
         const trashPosts = ref([]);
         const confirmModal = ref({ show: false, title: '', message: '', onConfirm: null });
-        const check = () => { const t = localStorage.getItem('token'); if (t) { logged.value = true; loadPosts(); } };
-        const api = (url, o = {}) => { o.headers = o.headers || {}; o.headers['Authorization'] = 'Bearer ' + localStorage.getItem('token'); return axios(url, o); };
-        const login = async () => { try { const r = await axios.post('/api/login', { password: password.value }); if (r.data.success) { localStorage.setItem('token', r.data.token); logged.value = true; loadPosts(); } } catch (e) { alert('登录失败'); } };
+        const check = () => { const t = localStorage.getItem('token'); if (t) { logged.value = true; loadPosts(); loadCategories(); loadSettings(); loadTrash(); } };
+        const api = (url, o = {}) => {
+          o.headers = o.headers || {};
+          o.headers['Authorization'] = 'Bearer ' + localStorage.getItem('token');
+          return axios(url, o).catch(function(e) {
+            if (e.response && e.response.status === 401) {
+              localStorage.removeItem('token');
+              logged.value = false;
+            }
+            throw e;
+          });
+        };
+        const login = async () => { try { const r = await axios.post('/api/login', { password: password.value }); if (r.data.success) { localStorage.setItem('token', r.data.token); logged.value = true; loadPosts(); loadCategories(); loadSettings(); loadTrash(); } } catch (e) { alert('登录失败'); } };
         const logout = () => { localStorage.removeItem('token'); logged.value = false; };
         const loadPosts = async () => { try { const r = await api('/api/admin/posts'); posts.value = r.data; } catch (e) {} };
         const loadCategories = async () => { try { const r = await api('/api/categories'); categories.value = r.data; } catch (e) {} };
@@ -583,7 +593,7 @@ export function getAdminHTML() {
           });
         };
 
-        onMounted(() => { check(); loadCategories(); loadSettings(); loadTrash(); document.addEventListener('click', closeAllSelects); });
+        onMounted(() => { check(); document.addEventListener('click', closeAllSelects); });
         return { logged, password, login, logout, posts, editingId, form, coverPreview, toast, openAdd, toggleEdit, handleCoverChange, handleDrop, deleteCover, savePost, deletePost, categories, currentPage, categoryForm, saveCategory, deleteCategory, editCategory, editingCategory, settingsForm, saveSettings, handleFavicon, handleFaviconDrop, handleAvatar, handleAvatarDrop, trashPosts, restorePost, permanentDelete, emptyTrash, confirmModal, showConfirm, insertMd, applyTheme, customSelects, toggleSelect, selectOption, getSelectLabel };
       }
     }).mount('#app');
