@@ -38,7 +38,8 @@ export function getAdminHTML() {
     .btn { padding: 10px 24px; background: var(--btn-bg, #19c8b9); color: #fff; border: none; border-radius: 50px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 0 0 var(--btn-shadow, #11a89b); }
     .btn:hover { transform: translateY(-1px); }
     .btn-danger { background: var(--danger-bg, #e05a5a); box-shadow: 0 4px 0 0 var(--danger-shadow, #c94444); }
-    .btn-cancel { background: #f0e8d8; color: #725d42; border: 2px solid #c4b89e; box-shadow: none; }
+    .btn-cancel { background: #e8e0d0; color: #725d42; border: none; border-radius: 50px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 0 0 #c4b89e; padding: 10px 24px; }
+    .btn-cancel:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #c4b89e; }
     .card { background: var(--card-bg, #f7f3df); border-radius: 20px; padding: 24px; box-shadow: 0 4px 10px rgba(107,92,67,0.42); border: 2px solid var(--card-border, #e8e0cc); margin-bottom: 16px; }
     .form-group { margin-bottom: 18px; }
     .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #794f27; }
@@ -334,7 +335,7 @@ export function getAdminHTML() {
         <div v-if="currentPage==='trash'">
           <div class="page-header"><h2>回收站</h2></div>
           <div v-if="trashPosts.length===0" class="card" style="text-align:center;color:#9f927d">回收站是空的</div>
-          <div style="width:66.66%"><div v-if="trashPosts.length > 0" class="card" style="padding:0;overflow:hidden">
+          <div style="width:33.33%"><div v-if="trashPosts.length > 0" class="card" style="padding:0;overflow:hidden">
             <table style="width:100%;border-collapse:collapse">
               <thead>
                 <tr style="background:#f0e8d8">
@@ -370,10 +371,10 @@ export function getAdminHTML() {
               <div class="form-group">
                 <label>网站图标</label>
                 <div style="display:flex;gap:12px;align-items:flex-start">
-                  <div class="cover-upload" @click="$refs.faviconInput.click()" @dragover.prevent @drop.prevent="handleFaviconDrop" style="width:80px;padding:12px;border:2px dashed #c4b89e;border-radius:12px;background:#f0e8d8;min-height:60px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <div class="cover-upload" @click="$refs.faviconInput.click()" @dragover.prevent @drop.prevent="handleFaviconDrop" style="width:80px;height:80px;padding:12px;border:2px dashed #c4b89e;border-radius:12px;background:#f0e8d8;display:flex;align-items:center;justify-content:center;flex-shrink:0">
                     <input ref="faviconInput" type="file" @change="handleFavicon" accept=".ico,image/*" style="display:none">
                     <div v-if="!settingsForm.site_favicon"><p style="color:#9f927d;font-size:12px">上传</p></div>
-                    <img v-else :src="settingsForm.site_favicon" style="width:32px;height:32px">
+                    <img v-else :src="settingsForm.site_favicon" style="width:64px;height:64px;border-radius:50%">
                   </div>
                   <div style="flex:1">
                     <input v-model="settingsForm.site_favicon" placeholder="或输入外链地址" style="width:100%;margin-bottom:6px">
@@ -408,10 +409,10 @@ export function getAdminHTML() {
               <div class="form-group">
                 <label>个人头像</label>
                 <div style="display:flex;gap:12px;align-items:flex-start">
-                  <div class="cover-upload" @click="$refs.avatarInput.click()" @dragover.prevent @drop.prevent="handleAvatarDrop" style="width:80px;padding:12px;border:2px dashed #c4b89e;border-radius:12px;background:#f0e8d8;min-height:80px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <div class="cover-upload" @click="$refs.avatarInput.click()" @dragover.prevent @drop.prevent="handleAvatarDrop" style="width:80px;height:80px;padding:12px;border:2px dashed #c4b89e;border-radius:12px;background:#f0e8d8;display:flex;align-items:center;justify-content:center;flex-shrink:0">
                     <input ref="avatarInput" type="file" @change="handleAvatar" accept="image/*" style="display:none">
                     <div v-if="!settingsForm.site_avatar"><p style="color:#9f927d;font-size:12px">上传</p></div>
-                    <img v-else :src="settingsForm.site_avatar" style="width:48px;height:48px;border-radius:50%">
+                    <img v-else :src="settingsForm.site_avatar" style="width:64px;height:64px;border-radius:50%">
                   </div>
                   <div style="flex:1">
                     <input v-model="settingsForm.site_avatar" placeholder="或输入外链地址" style="width:100%;margin-bottom:6px">
