@@ -45,6 +45,16 @@ export default {
         return handleAPI(request, env, path);
       }
 
+      // robots.txt
+      if (path === '/robots.txt') {
+        return handleRobots(env);
+      }
+
+      // favicon.ico（从 settings 读取或返回空）
+      if (path === '/favicon.ico') {
+        return handleFavicon(env);
+      }
+
       // API 路由
       if (path.startsWith('/api/')) {
         return handleAPI(request, env, path);
@@ -85,6 +95,55 @@ async function handleFrontendPage(request, env, ctx) {
     const settings = await getSettings(env);
     return html(getFrontendHTML(settings));
   }, 300); // 缓存 5 分钟
+}
+
+/**
+ * robots.txt
+ */
+async function handleRobots(env) {
+  const settings = await getSettings(env);
+  const allowRobots = settings.allow_robots !== '0';
+  const host = settings.site_name || 'Blog';
+
+  const content = allowRobots
+    ? `User-agent: *
+Allow: /
+Sitemap: /sitemap.xml
+`
+    : `User-agent: *
+Disallow: /
+`;
+
+  return new Response(content, {
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+  });
+}
+
+/**
+ * favicon.ico
+ */
+async function handleFavicon(env) {
+  const settings = await getSettings(env);
+  const favicon = settings.site_favicon;
+
+  if (favicon && favicon.startsWith('/images/') && env.R2) {
+    const filename = favicon.replace('/images/', '');
+    const object = await env.R2.get(filename);
+    if (object) {
+      return new Response(object.body, {
+        headers: {
+          'Content-Type': object.httpMetadata?.contentType || 'image/x-icon',
+          'Cache-Control': 'public, max-age=86400'
+        }
+      });
+    }
+  }
+
+  if (favicon && favicon.startsWith('http')) {
+    return Response.redirect(favicon, 302);
+  }
+
+  return new Response(null, { status: 204 });
 }
 
 /**

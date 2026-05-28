@@ -162,26 +162,26 @@ export function getAdminHTML() {
 </head>
 <body>
   <div id="app">
-    <div v-if="!logged" class="login">
+    <div v-if="!logged" class="login" role="main" aria-label="登录">
       <div class="login-box">
         <h1>博客管理后台</h1>
-        <input v-model="password" type="password" placeholder="请输入密码" @keyup.enter="login">
-        <button @click="login">登录</button>
+        <input v-model="password" type="password" placeholder="请输入密码" @keyup.enter="login" aria-label="管理员密码">
+        <button @click="login" aria-label="登录">登录</button>
       </div>
     </div>
     <div v-else class="admin-layout">
-      <nav class="sidebar">
+      <nav class="sidebar" role="navigation" aria-label="主导航">
         <div class="sidebar-header"><h1>管理后台</h1></div>
-        <div class="sidebar-menu">
-          <a href="#" :class="{active:currentPage==='posts'}" @click.prevent="currentPage='posts'">📝 文章管理</a>
-          <a href="#" :class="{active:currentPage==='category'}" @click.prevent="currentPage='category'">📂 分类管理</a>
-          <a href="#" :class="{active:currentPage==='trash'}" @click.prevent="currentPage='trash'">🗑️ 回收站</a>
-          <a href="#" :class="{active:currentPage==='settings'}" @click.prevent="currentPage='settings'">⚙️ 网站设置</a>
-          <a href="#" :class="{active:currentPage==='profile'}" @click.prevent="currentPage='profile'">👤 个人设置</a>
+        <div class="sidebar-menu" role="menubar">
+          <a href="#" role="menuitem" :class="{active:currentPage==='posts'}" @click.prevent="currentPage='posts'" aria-label="文章管理">📝 文章管理</a>
+          <a href="#" role="menuitem" :class="{active:currentPage==='category'}" @click.prevent="currentPage='category'" aria-label="分类管理">📂 分类管理</a>
+          <a href="#" role="menuitem" :class="{active:currentPage==='trash'}" @click.prevent="currentPage='trash'" aria-label="回收站">🗑️ 回收站</a>
+          <a href="#" role="menuitem" :class="{active:currentPage==='settings'}" @click.prevent="currentPage='settings'" aria-label="网站设置">⚙️ 网站设置</a>
+          <a href="#" role="menuitem" :class="{active:currentPage==='profile'}" @click.prevent="currentPage='profile'" aria-label="个人设置">👤 个人设置</a>
         </div>
         <div class="sidebar-footer"><button @click="logout">退出登录</button></div>
       </nav>
-      <div class="main-content">
+      <div class="main-content" role="main" aria-label="主要内容">
         <div v-if="currentPage==='posts'">
           <div class="page-header"><h2>文章管理</h2></div>
           <button class="btn" @click="openAdd()" style="margin-bottom:16px">新建文章</button>
@@ -397,6 +397,19 @@ export function getAdminHTML() {
               </div>
               <div class="form-group"><label>网站页脚（HTML）</label><textarea v-model="settingsForm.site_footer" rows="3"></textarea></div>
               <div class="form-group"><label>自定义JS</label><textarea v-model="settingsForm.custom_js" rows="4"></textarea></div>
+              <div class="form-group">
+                <label>功能开关</label>
+                <div style="display:flex;gap:20px;margin-top:8px">
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#725d42">
+                    <input type="checkbox" :true-value="'1'" :false-value="'0'" v-model="settingsForm.allow_robots" style="width:18px;height:18px;cursor:pointer">
+                    允许搜索引擎爬取
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#725d42">
+                    <input type="checkbox" :true-value="'1'" :false-value="'0'" v-model="settingsForm.enable_compression" style="width:18px;height:18px;cursor:pointer">
+                    启用压缩
+                  </label>
+                </div>
+              </div>
               <button class="btn" @click="saveSettings" style="width:100%;margin-top:16px">保存设置</button>
             </div>
           </div>
@@ -475,10 +488,10 @@ export function getAdminHTML() {
         };
         const login = async () => { try { const r = await axios.post('/api/login', { password: password.value }); if (r.data.success) { localStorage.setItem('token', r.data.token); logged.value = true; loadPosts(); loadCategories(); loadSettings(); loadTrash(); } } catch (e) { alert('登录失败'); } };
         const logout = () => { localStorage.removeItem('token'); logged.value = false; };
-        const loadPosts = async () => { try { const r = await api('/api/admin/posts'); posts.value = r.data; } catch (e) {} };
-        const loadCategories = async () => { try { const r = await api('/api/categories'); categories.value = r.data; } catch (e) {} };
-        const loadSettings = async () => { try { const r = await api('/api/settings'); settingsForm.value = { site_name: r.data.site_name || '', site_description: r.data.site_description || '', site_favicon: r.data.site_favicon || '', site_avatar: r.data.site_avatar || '', site_bio: r.data.site_bio || '', site_links: r.data.site_links || '', site_author: r.data.site_author || '', site_footer: r.data.site_footer || '', custom_js: r.data.custom_js || '', site_theme: r.data.site_theme || 'animal-forest' }; applyTheme(); } catch (e) {} };
-        const loadTrash = async () => { try { const r = await api('/api/admin/trash'); trashPosts.value = r.data; } catch (e) {} };
+        const loadPosts = async () => { try { const r = await api('/api/admin/posts'); posts.value = r.data; } catch (e) { showToast('加载文章失败'); } };
+        const loadCategories = async () => { try { const r = await api('/api/categories'); categories.value = r.data; } catch (e) { showToast('加载分类失败'); } };
+        const loadSettings = async () => { try { const r = await api('/api/settings'); settingsForm.value = { site_name: r.data.site_name || '', site_description: r.data.site_description || '', site_favicon: r.data.site_favicon || '', site_avatar: r.data.site_avatar || '', site_bio: r.data.site_bio || '', site_links: r.data.site_links || '', site_author: r.data.site_author || '', site_footer: r.data.site_footer || '', custom_js: r.data.custom_js || '', site_theme: r.data.site_theme || 'animal-forest', allow_robots: r.data.allow_robots || '1', enable_compression: r.data.enable_compression || '1' }; applyTheme(); } catch (e) { showToast('加载设置失败'); } };
+        const loadTrash = async () => { try { const r = await api('/api/admin/trash'); trashPosts.value = r.data; } catch (e) { showToast('加载回收站失败'); } };
         const showToast = (m) => { toast.value = m; setTimeout(() => toast.value = '', 2000); };
         const showConfirm = (t, m) => new Promise(r => { confirmModal.value = { show: true, title: t, message: m, onConfirm: () => { confirmModal.value.show = false; r(true); } }; });
         const postPage = ref(1);
@@ -487,10 +500,10 @@ export function getAdminHTML() {
         const cancelNewPost = async () => { const c = await showConfirm('确认取消', '未保存的内容将丢失'); if (c) { editingId.value = null; } };
         const toggleEdit = (p) => { if (editingId.value === p.id) { editingId.value = null; } else { editingId.value = p.id; form.value = { title: p.title, content: p.content, category: p.category, tags: p.tags, status: p.status, cover_image: p.cover_image || '', password: p.password || '', published_at: p.published_at ? p.published_at.split('T')[0] : new Date().toISOString().split('T')[0] }; coverPreview.value = p.cover_image || ''; } };
         const savePost = async () => { const c = await showConfirm('确认保存', '确定保存？'); if (!c) return; try { if (editingId.value === 'new') { await api('/api/admin/post', { method: 'POST', data: form.value }); } else { await api('/api/admin/post?id=' + editingId.value, { method: 'PUT', data: form.value }); } editingId.value = null; loadPosts(); showToast('保存成功'); } catch (e) { alert('保存失败'); } };
-        const deletePost = async (id) => { const c = await showConfirm('确认删除', '移到回收站？'); if (!c) return; try { await api('/api/admin/post?id=' + id, { method: 'DELETE' }); loadPosts(); loadTrash(); showToast('已移到回收站'); } catch (e) {} };
+        const deletePost = async (id) => { const c = await showConfirm('确认删除', '移到回收站？'); if (!c) return; try { await api('/api/admin/post?id=' + id, { method: 'DELETE' }); loadPosts(); loadTrash(); showToast('已移到回收站'); } catch (e) { showToast('删除失败'); } };
         const editCategory = (c) => { editingCategory.value = c.id; categoryForm.value = { name: c.name, slug: c.slug, description: c.description || '' }; };
         const saveCategory = async () => { if (!categoryForm.value.name || !categoryForm.value.slug) { alert('请填写'); return; } const c = await showConfirm('确认保存', '确定？'); if (!c) return; try { const d = { ...categoryForm.value }; if (editingCategory.value && editingCategory.value !== 'new') d.id = editingCategory.value; await api('/api/category', { method: 'POST', data: d }); loadCategories(); editingCategory.value = null; categoryForm.value = { name: '', slug: '', description: '' }; showToast('保存成功'); } catch (e) { alert('保存失败'); } };
-        const deleteCategory = async (id) => { const c = await showConfirm('确认删除', '确定？'); if (!c) return; try { await api('/api/category?id=' + id, { method: 'DELETE' }); loadCategories(); showToast('已删除'); } catch (e) {} };
+        const deleteCategory = async (id) => { const c = await showConfirm('确认删除', '确定？'); if (!c) return; try { await api('/api/category?id=' + id, { method: 'DELETE' }); loadCategories(); showToast('已删除'); } catch (e) { showToast('删除分类失败'); } };
         const saveSettings = async () => { try { await api('/api/settings', { method: 'POST', data: settingsForm.value }); showToast('保存成功'); } catch (e) { alert('保存失败'); } };
         const handleCoverChange = async (e) => { const f = e.target.files[0]; if (f) await uploadFile(f); };
         const handleDrop = async (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) await uploadFile(f); };
@@ -501,8 +514,8 @@ export function getAdminHTML() {
         const handleFaviconDrop = async (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) await uploadFavicon(f); };
         const uploadFavicon = async (f) => { if (f.size > 1048576) { alert('文件大小不能超过 1MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.site_favicon = d.url; };
         const handleAvatar = async (e) => { const f = e.target.files[0]; if (!f) return; if (f.size > 1048576) { alert('文件大小不能超过 1MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.site_avatar = d.url; };
-        const restorePost = async (id) => { const c = await showConfirm('确认恢复', '将文章恢复为草稿？'); if (!c) return; try { await api('/api/admin/restore', { method: 'POST', data: { id } }); loadPosts(); loadTrash(); showToast('已恢复'); } catch (e) {} };
-        const permanentDelete = async (id) => { const c = await showConfirm('确认删除', '彻底删除？不可恢复！'); if (!c) return; try { await api('/api/admin/permanent-delete', { method: 'POST', data: { id } }); loadTrash(); showToast('已删除'); } catch (e) {} };
+        const restorePost = async (id) => { const c = await showConfirm('确认恢复', '将文章恢复为草稿？'); if (!c) return; try { await api('/api/admin/restore', { method: 'POST', data: { id } }); loadPosts(); loadTrash(); showToast('已恢复'); } catch (e) { showToast('恢复失败'); } };
+        const permanentDelete = async (id) => { const c = await showConfirm('确认删除', '彻底删除？不可恢复！'); if (!c) return; try { await api('/api/admin/permanent-delete', { method: 'POST', data: { id } }); loadTrash(); showToast('已删除'); } catch (e) { showToast('删除失败'); } };
 
         
         const insertMd = (type) => {

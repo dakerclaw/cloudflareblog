@@ -18,10 +18,37 @@ export async function handleAPI(request, env, path) {
       if (!env.ADMIN_PASSWORD) {
         return json({ success: true, token: 'no-auth' });
       }
+
+      // 速率限制：5次/10分钟
+      const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+      const rateKey = 'login_rate_' + clientIP;
+      try {
+        const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(rateKey).first();
+        if (row) {
+          const data = JSON.parse(row.value);
+          const recent = data.filter(t => Date.now() - t < 600000);
+          if (recent.length >= 5) {
+            return json({ success: false, error: '登录尝试次数过多，请 10 分钟后再试' }, 429);
+          }
+        }
+      } catch (e) {}
+
       if (body.password === env.ADMIN_PASSWORD) {
+        try { await env.DB.prepare("DELETE FROM settings WHERE key=?").bind(rateKey).run(); } catch (e) {}
         const token = await generateToken(env.ADMIN_PASSWORD);
         return json({ success: true, token });
       }
+
+      // 记录失败尝试
+      try {
+        const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(rateKey).first();
+        let attempts = [];
+        if (row) { try { attempts = JSON.parse(row.value); } catch (e) {} }
+        attempts.push(Date.now());
+        attempts = attempts.filter(t => Date.now() - t < 600000);
+        await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").bind(rateKey, JSON.stringify(attempts)).run();
+      } catch (e) {}
+
       return json({ success: false, error: '密码错误' }, 401);
     }
 
@@ -81,9 +108,7 @@ export async function handleAPI(request, env, path) {
     if (path === '/api/admin/permanent-delete' && method === 'POST') {
       return handlePermanentDelete(request, env);
     }
-    if (path === '/api/admin/empty-trash' && method === 'POST') {
-      return handleEmptyTrash(env);
-    }
+
 
     // 分类管理
     if (path === '/api/category' && method === 'POST') {
@@ -387,10 +412,7 @@ async function handlePermanentDelete(request, env) {
   return json({ success: true });
 }
 
-async function handleEmptyTrash(env) {
-  await env.DB.prepare("DELETE FROM posts WHERE status='trash'").run();
-  return json({ success: true });
-}
+
 
 async function handleSaveCategory(request, env) {
   const body = await request.json();
