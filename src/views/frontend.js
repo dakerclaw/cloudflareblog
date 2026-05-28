@@ -118,7 +118,7 @@ export function getFrontendHTML(settings) {
         </div>
         <h4>📂 分类</h4>
         <div id="category-list" class="category-list"></div>
-        <h4>🔗 友链</h4>
+        <h4>🔗 ${escapeHtml(settings.links_title || '友链')}</h4>
         <div id="link-list" class="link-list"></div>
       </div>
     </aside>
@@ -191,13 +191,10 @@ export function getFrontendHTML(settings) {
         }
 
         var formatDate = function(d) { var dt = new Date(d); return dt.getFullYear() + String(dt.getMonth()+1).padStart(2,'0'); };
-        var tagColors = ['#7eb8a9','#c9a86c','#c47a7a','#8a9cc5','#7aaa8a','#c49a6c','#a488b8','#c4a0aa'];
-
         html += posts.map(function(post) {
           var cover = post.cover_image ? '<img src="' + post.cover_image + '" alt="' + post.title + '" loading="lazy">' : '<span style="color:#9f927d">暂无封面</span>';
-          var tags = post.tags ? post.tags.split(',').map(function(t,i) {
-            var c = tagColors[i % tagColors.length];
-            return '<span style="display:inline-block;padding:3px 10px;background:' + c + '22;color:' + c + ';font-size:0.72em;font-weight:700;margin-right:8px;border:1.5px solid ' + c + '55;border-radius:6px;box-shadow:1px 2px 4px ' + c + '20">' + t.trim() + '</span>';
+          var tags = post.tags ? post.tags.split(',').map(function(t) {
+            return '<span style="display:inline-block;padding:3px 10px;background:#fff3c4;color:#9a7b3a;font-size:0.72em;font-weight:700;margin-right:8px;border:1px solid #e8d49a;border-radius:4px;box-shadow:1px 2px 3px rgba(154,123,58,0.15)">' + t.trim() + '</span>';
           }).join('') : '';
           function stripHtml(str) { return str ? str.split('<').join('').split('>').join('').split('&lt;').join('<').split('&gt;').join('>').split('&amp;').join('&').substring(0, 80) : ''; }
           var rawText = post.excerpt || post.content || '';

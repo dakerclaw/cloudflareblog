@@ -120,7 +120,7 @@ export function getPostHTML(post, settings) {
         </div>
         <h4>📂 分类</h4>
         <div id="category-list" class="category-list"></div>
-        <h4>🔗 友链</h4>
+        <h4>🔗 ${escapeHtml(settings.links_title || '友链')}</h4>
         <div id="link-list" class="link-list"></div>
       </div>
     </aside>
@@ -129,15 +129,13 @@ export function getPostHTML(post, settings) {
       <article class="post-article">
         <h1>${escapeHtml(post.title)}</h1>
         <div class="post-meta">
-          <span>📂 ${escapeHtml(post.category)}</span>
-          <span>📅 ${new Date(post.created_at).toLocaleDateString('zh-CN')}</span>
+          <span>${escapeHtml(post.category)}</span>
+          <span>${new Date(post.created_at).toLocaleDateString('zh-CN')}</span>
         </div>
         <div id="post-content" style="line-height:1.8"></div>
-        ${post.tags ? `<div style="margin-top:24px;padding-top:16px;border-top:2px solid #e8e0cc;display:flex;flex-wrap:wrap;gap:8px">${post.tags.split(',').map((t, i) => {
-          const tagColors = ['#7eb8a9','#c9a86c','#c47a7a','#8a9cc5','#7aaa8a','#c49a6c','#a488b8','#c4a0aa'];
-          const c = tagColors[i % tagColors.length];
-          return `<span style="display:inline-block;padding:3px 10px;background:${c}22;color:${c};font-size:0.78em;font-weight:700;border:1.5px solid ${c}55;border-radius:6px;box-shadow:1px 2px 4px ${c}20">${escapeHtml(t.trim())}</span>`;
-        }).join('')}</div>` : ''}
+        ${post.tags ? `<div style="margin-top:24px;padding-top:16px;border-top:2px solid #e8e0cc;display:flex;flex-wrap:wrap;gap:8px">${post.tags.split(',').map(t =>
+          `<span style="display:inline-block;padding:4px 12px;background:#fff3c4;color:#9a7b3a;font-size:0.82em;font-weight:700;border:1px solid #e8d49a;border-radius:4px;box-shadow:1px 2px 3px rgba(154,123,58,0.15)">${escapeHtml(t.trim())}</span>`
+        ).join('')}</div>` : ''}
       </article>
     </div>
   </main>
