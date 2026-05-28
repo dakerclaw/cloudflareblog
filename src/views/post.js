@@ -290,8 +290,7 @@ export function getPostHTML(post, settings) {
         marked.setOptions({ breaks: true, gfm: true });
         html = marked.parse(content);
       } else {
-        html = '<p>' + content.split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;').split('
-').join('<br>') + '</p>';
+        html = '<p>' + content.split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;').split(String.fromCharCode(10)).join('<br>') + '</p>';
       }
 
       // 第三步：还原代码块，用 <pre><code> 包裹 + 语法高亮
