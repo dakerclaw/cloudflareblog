@@ -236,6 +236,9 @@ export function getPostHTML(post, settings) {
   <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
   <style>
     pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; margin: 16px 0; border: 1px solid #30363d; box-shadow: 0 4px 16px rgba(0,0,0,0.3); position: relative; }
+    .copy-btn { position: absolute; top: 8px; right: 8px; padding: 4px 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: rgba(255,255,255,0.6); font-size: 12px; cursor: pointer; transition: all 0.2s; z-index: 1; }
+    .copy-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+    .copy-btn.copied { background: rgba(25,200,185,0.3); color: #19c8b9; border-color: #19c8b9; }
     pre::before { content: ''; position: absolute; top: 12px; left: 16px; width: 12px; height: 12px; border-radius: 50%; background: #ff5f57; box-shadow: 20px 0 0 #febc2e, 40px 0 0 #28c840; }
     pre code { font-family: 'Fira Code', 'Consolas', 'Monaco', monospace; font-size: 14px; line-height: 1.7; color: #e6edf3; background: none; padding: 0; border: none; border-radius: 0; box-shadow: none; display: block; padding-top: 20px; }
     code { font-family: 'Fira Code', 'Consolas', 'Monaco', monospace; background: #1b2230; color: #e6edf3; padding: 3px 10px; border-radius: 6px; font-size: 0.88em; border: 1px solid #30363d; }
@@ -264,24 +267,44 @@ export function getPostHTML(post, settings) {
       var tick = String.fromCharCode(96);
       var nl = String.fromCharCode(10);
 
-      // 第一步：提取代码块，转义其中的 HTML，用占位符替换
+      // 第一步：提取代码块（支持 ``` 和 ` 两种分隔符），转义 HTML
       var codeBlocks = [];
       var content = raw;
+      // 先处理 ``` 代码块
       while (true) {
-        var fenceStart = content.indexOf(nl + fence);
-        if (fenceStart === -1) fenceStart = content.indexOf(fence);
-        if (fenceStart === -1) break;
-        var afterFence = content.indexOf(fence, fenceStart + fence.length);
-        if (afterFence === -1) break;
-        var codeContent = content.substring(fenceStart + fence.length, afterFence);
-        // 去掉语言标识行
-        var firstNl = codeContent.indexOf(nl);
-        if (firstNl !== -1) codeContent = codeContent.substring(firstNl + 1);
-        // 转义 HTML（用 split+join 避免正则）
-        var escaped = codeContent.split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;');
+        var fs = content.indexOf(nl + fence);
+        if (fs === -1) fs = content.indexOf(fence);
+        if (fs === -1) break;
+        var af = content.indexOf(fence, fs + fence.length);
+        if (af === -1) break;
+        var cc = content.substring(fs + fence.length, af);
+        var fn = cc.indexOf(nl);
+        if (fn !== -1) cc = cc.substring(fn + 1);
+        var esc = cc.split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;');
         var idx = codeBlocks.length;
-        codeBlocks.push(escaped);
-        content = content.substring(0, fenceStart) + nl + '%%CODEBLOCK_' + idx + '%%' + nl + content.substring(afterFence + fence.length);
+        codeBlocks.push(esc);
+        content = content.substring(0, fs) + nl + '%%CB_' + idx + '%%' + nl + content.substring(af + fence.length);
+      }
+      // 再处理未闭合的单 ` 代码块（` 开头到内容结尾）
+      while (true) {
+        var si = content.indexOf(tick);
+        if (si === -1) break;
+        var ei = content.indexOf(tick, si + 1);
+        if (ei !== -1) {
+          // 有闭合的单 `，正常处理
+          var sc = content.substring(si + 1, ei);
+          var esc2 = sc.split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;');
+          var idx2 = codeBlocks.length;
+          codeBlocks.push(esc2);
+          content = content.substring(0, si) + '%%CB_' + idx2 + '%%' + content.substring(ei + 1);
+        } else {
+          // 没有闭合的 `，取到内容结尾
+          var sc2 = content.substring(si + 1);
+          var esc3 = sc2.split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;');
+          var idx3 = codeBlocks.length;
+          codeBlocks.push(esc3);
+          content = content.substring(0, si) + '%%CB_' + idx3 + '%%';
+        }
       }
 
       // 第二步：用 marked 解析（代码块已被占位符替换，不会有 HTML 问题）
@@ -307,6 +330,27 @@ export function getPostHTML(post, settings) {
       }
 
       document.getElementById('post-content').innerHTML = html;
+
+      // 为代码块添加复制按钮
+      var pres = document.querySelectorAll('pre');
+      for (var p = 0; p < pres.length; p++) {
+        var btn = document.createElement('button');
+        btn.className = 'copy-btn';
+        btn.textContent = '复制';
+        btn.onclick = (function(pre, button) {
+          return function() {
+            var code = pre.querySelector('code');
+            var text = code ? code.textContent : pre.textContent;
+            navigator.clipboard.writeText(text).then(function() {
+              button.textContent = '已复制';
+              button.classList.add('copied');
+              setTimeout(function() { button.textContent = '复制'; button.classList.remove('copied'); }, 2000);
+            });
+          };
+        })(pres[p], btn);
+        pres[p].appendChild(btn);
+      }
+
       initLightbox();
     });
   </script>
