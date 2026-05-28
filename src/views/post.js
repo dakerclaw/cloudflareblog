@@ -264,13 +264,22 @@ export function getPostHTML(post, settings) {
       var html = marked.parse(content);
 
       // 后处理：找到 marked 输出中未被包裹的转义 HTML，包装为代码块
-      var re = new RegExp('(<p>|(?:<br>)?)((?:.*?(?:&lt;\\/?[a-zA-Z][^&]*?&gt;).*?[\
-]?)+)', 'gm');
-      html = html.replace(re, function(match, prefix, body) {
-        if (body.indexOf('<pre') !== -1) return match;
-        if (body.indexOf('&lt;') === -1) return match;
-        return prefix + '<pre><code>' + body.trim() + '</code></pre>';
-      });
+      // 后处理：将包含转义 HTML 的段落转为代码块样式
+      var parts = html.split('<p>');
+      var result = [parts[0]];
+      for (var i = 1; i < parts.length; i++) {
+        var part = parts[i];
+        var closeIdx = part.indexOf('</p>');
+        if (closeIdx === -1) { result.push('<p>' + part); continue; }
+        var inner = part.substring(0, closeIdx);
+        var rest = part.substring(closeIdx + 4);
+        if (inner.indexOf('&lt;') !== -1 && inner.indexOf('<pre') === -1) {
+          result.push('<pre><code>' + inner + '</code></pre>' + rest);
+        } else {
+          result.push('<p>' + part);
+        }
+      }
+      html = result.join('');
 
       document.getElementById('post-content').innerHTML = html;
       document.querySelectorAll('pre code').forEach(function(block) { hljs.highlightElement(block); });
