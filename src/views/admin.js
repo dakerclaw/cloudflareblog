@@ -192,7 +192,7 @@ export function getAdminHTML() {
                   <th style="padding:16px 16px;text-align:center;color:#794f27;font-weight:700;font-size:15px;width:70px;white-space:nowrap">编辑</th>
                   <th style="padding:16px 16px;text-align:center;color:#794f27;font-weight:700;font-size:15px;width:60px">ID</th>
                   <th style="padding:16px 16px;text-align:left;color:#794f27;font-weight:700;font-size:15px">文章标题</th>
-                  <th style="padding:16px 16px;text-align:left;color:#794f27;font-weight:700;font-size:15px;width:100px">分类</th>
+                  <th style="padding:16px 16px;text-align:left;color:#794f27;font-weight:700;font-size:15px;width:150px;white-space:nowrap">分类</th>
                   <th style="padding:16px 16px;text-align:center;color:#794f27;font-weight:700;font-size:15px;width:100px">状态</th>
                   <th style="padding:16px 16px;text-align:right;color:#794f27;font-weight:700;font-size:15px;width:120px">发布日期</th>
                 </tr>
@@ -204,7 +204,7 @@ export function getAdminHTML() {
                     <td style="padding:14px 16px;text-align:center;white-space:nowrap"><button class="edit" @click="toggleEdit(post)" style="padding:5px 14px;border:none;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap">{{editingId===post.id?'收起':'编辑'}}</button></td>
                     <td style="padding:14px 16px;text-align:center;color:#9f927d;font-size:14px">#{{post.id}}</td>
                     <td style="padding:14px 16px;color:#794f27;font-weight:600;font-size:16px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{post.title}}</td>
-                    <td style="padding:14px 16px;color:#9f927d;font-size:15px">{{post.category}}</td>
+                    <td style="padding:14px 16px;color:#9f927d;font-size:15px;white-space:nowrap">{{post.category}}</td>
                     <td style="padding:14px 16px;text-align:center;white-space:nowrap"><span :style="{display:'inline-block',width:'8px',height:'8px',borderRadius:'50%',background:post.status==='published'?'#22c55e':'#9f927d',marginRight:'6px',verticalAlign:'middle'}"></span><span style="font-size:15px;color:#725d42;vertical-align:middle">{{post.status==='published'?'已发布':'草稿'}}</span></td>
                     <td style="padding:14px 16px;text-align:right;color:#9f927d;font-size:15px">{{new Date(post.published_at || post.created_at).toLocaleDateString('zh-CN')}}</td>
                   </tr>
@@ -338,25 +338,44 @@ export function getAdminHTML() {
         <div v-if="currentPage==='category'">
           <div class="page-header"><h2>分类管理</h2></div>
           <button class="btn" @click="editingCategory='new';categoryForm={name:'',slug:'',description:''}" style="margin-bottom:16px">添加分类</button>
-          <div v-if="editingCategory==='new'" class="card">
-            <h3 style="margin-bottom:16px;color:#794f27">添加分类</h3>
+          <div v-if="editingCategory==='new'" class="card" style="width:33%">
             <div class="form-row">
               <div class="form-group"><label>英文ID</label><input v-model="categoryForm.slug"></div>
               <div class="form-group"><label>中文名称</label><input v-model="categoryForm.name"></div>
             </div>
             <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" @click="saveCategory">保存</button><button class="btn btn-cancel" @click="editingCategory=null">取消</button></div>
           </div>
-          <div v-for="cat in categories" :key="cat.id" class="card">
-            <div style="display:flex;align-items:center;gap:12px">
-              <div class="actions"><button class="delete" @click="deleteCategory(cat.id)">删除</button><button class="edit" @click="editingCategory===cat.id?editingCategory=null:editCategory(cat)">{{editingCategory===cat.id?'收起':'编辑'}}</button></div>
-              <div style="flex:1"><span style="font-weight:600;color:#794f27">{{cat.name}}</span><span style="color:#9f927d;margin-left:8px">/{{cat.slug}}</span></div>
-            </div>
-            <div v-if="editingCategory===cat.id" style="margin-top:16px;padding-top:16px;border-top:2px solid #e8e0cc">
-              <div class="form-row">
-                <div class="form-group"><label>英文ID</label><input v-model="categoryForm.slug"></div>
-                <div class="form-group"><label>中文名称</label><input v-model="categoryForm.name"></div>
-              </div>
-              <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" @click="saveCategory">保存</button><button class="btn btn-cancel" @click="editingCategory=null">取消</button></div>
+          <div style="width:33%">
+            <div class="card" style="padding:0;overflow:hidden">
+              <table style="width:100%;border-collapse:collapse">
+                <thead>
+                  <tr style="background:#f0e8d8">
+                    <th style="padding:14px 16px;text-align:center;color:#794f27;font-weight:700;font-size:15px;width:70px;white-space:nowrap">删除</th>
+                    <th style="padding:14px 16px;text-align:center;color:#794f27;font-weight:700;font-size:15px;width:70px;white-space:nowrap">编辑</th>
+                    <th style="padding:14px 16px;text-align:left;color:#794f27;font-weight:700;font-size:15px">英文ID</th>
+                    <th style="padding:14px 16px;text-align:left;color:#794f27;font-weight:700;font-size:15px">中文名称</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-for="cat in categories" :key="cat.id">
+                    <tr style="border-top:1px solid #e8e0cc">
+                      <td style="padding:12px 16px;text-align:center;white-space:nowrap"><button class="delete" @click="deleteCategory(cat.id)" style="padding:4px 12px;border:none;border-radius:50px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap">删除</button></td>
+                      <td style="padding:12px 16px;text-align:center;white-space:nowrap"><button class="edit" @click="editingCategory===cat.id?editingCategory=null:editCategory(cat)" style="padding:4px 12px;border:none;border-radius:50px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap">{{editingCategory===cat.id?'收起':'编辑'}}</button></td>
+                      <td style="padding:12px 16px;color:#9f927d;font-size:14px">/{{cat.slug}}</td>
+                      <td style="padding:12px 16px;color:#794f27;font-weight:600;font-size:15px">{{cat.name}}</td>
+                    </tr>
+                    <tr v-if="editingCategory===cat.id">
+                      <td colspan="4" style="padding:16px;background:#faf8f2;border-top:2px solid #e8e0cc">
+                        <div class="form-row">
+                          <div class="form-group"><label>英文ID</label><input v-model="categoryForm.slug"></div>
+                          <div class="form-group"><label>中文名称</label><input v-model="categoryForm.name"></div>
+                        </div>
+                        <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" @click="saveCategory">保存</button><button class="btn btn-cancel" @click="editingCategory=null">取消</button></div>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
