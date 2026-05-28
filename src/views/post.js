@@ -267,10 +267,10 @@ export function getPostHTML(post, settings) {
       var tick = String.fromCharCode(96);
       var nl = String.fromCharCode(10);
 
-      // 第一步：提取代码块（支持 ``` 和 ` 两种分隔符），转义 HTML
+      // 第一步：提取代码块，转义 HTML
       var codeBlocks = [];
       var content = raw;
-      // 先处理 ``` 代码块
+      // 先处理三反引号代码块
       while (true) {
         var fs = content.indexOf(nl + fence);
         if (fs === -1) fs = content.indexOf(fence);
@@ -285,20 +285,20 @@ export function getPostHTML(post, settings) {
         codeBlocks.push(esc);
         content = content.substring(0, fs) + nl + '%%CB_' + idx + '%%' + nl + content.substring(af + fence.length);
       }
-      // 再处理未闭合的单 ` 代码块（` 开头到内容结尾）
+      // 再处理未闭合的单反引号代码块
       while (true) {
         var si = content.indexOf(tick);
         if (si === -1) break;
         var ei = content.indexOf(tick, si + 1);
         if (ei !== -1) {
-          // 有闭合的单 `，正常处理
+          // 有闭合的单反引号
           var sc = content.substring(si + 1, ei);
           var esc2 = sc.split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;');
           var idx2 = codeBlocks.length;
           codeBlocks.push(esc2);
           content = content.substring(0, si) + '%%CB_' + idx2 + '%%' + content.substring(ei + 1);
         } else {
-          // 没有闭合的 `，取到内容结尾
+          // 没有闭合的反引号，取到内容结尾
           var sc2 = content.substring(si + 1);
           var esc3 = sc2.split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;');
           var idx3 = codeBlocks.length;
