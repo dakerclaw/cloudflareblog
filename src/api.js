@@ -452,7 +452,12 @@ async function handleSaveLinks(request, env) {
 }
 
 async function handleSaveSettings(request, env) {
-  const body = await request.json();
-  await saveSettings(env, body);
-  return json({ success: true });
+  try {
+    const body = await request.json();
+    await saveSettings(env, body);
+    return json({ success: true });
+  } catch (e) {
+    console.error('[API] 保存设置失败:', e);
+    return json({ success: false, error: '保存设置失败: ' + e.message }, 500);
+  }
 }

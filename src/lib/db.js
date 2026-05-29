@@ -120,11 +120,10 @@ export async function initDB(env) {
       ['site_author', '']
     ];
 
-    // 使用批量操作减少数据库调用
-    const stmts = defaultSettings.map(([key, value]) =>
-      DB.prepare("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)").bind(key, value)
-    );
-    await DB.batch(stmts);
+    // 逐条插入默认设置（避免 D1 batch 10条限制）
+    for (const [key, value] of defaultSettings) {
+      await DB.prepare("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)").bind(key, value).run();
+    }
 
     // ========== 5. 插入示例文章（仅在表为空时）==========
     const postCount = await DB.prepare("SELECT COUNT(*) as cnt FROM posts").first();
@@ -190,8 +189,8 @@ export async function getSettings(env) {
  * 保存设置（批量）
  */
 export async function saveSettings(env, settingsObj) {
-  const stmts = Object.entries(settingsObj).map(([key, value]) =>
-    env.DB.prepare("INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)").bind(key, String(value))
-  );
-  await env.DB.batch(stmts);
+  const entries = Object.entries(settingsObj).filter(([key, value]) => value !== undefined && value !== null);
+  for (const [key, value] of entries) {
+    await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)").bind(key, String(value)).run();
+  }
 }
