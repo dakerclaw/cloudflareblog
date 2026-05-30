@@ -1,6 +1,6 @@
 // ==================== API 处理模块（分页 + 错误处理）====================
 
-import { json, errorResponse, generateSlug } from './lib/utils.js';
+import { json, errorResponse, generateSlug, getCorsHeaders } from './lib/utils.js';
 import { generateToken, verifyToken, authenticateRequest } from './lib/auth.js';
 import { initDB, getSettings, saveSettings } from './lib/db.js';
 import { handleUpload } from './lib/image.js';
@@ -10,8 +10,114 @@ import { handleUpload } from './lib/image.js';
  */
 export async function handleAPI(request, env, path) {
   const method = request.method;
+  const settings = await getSettings(env);
+  const cors = getCorsHeaders(request, settings.allowed_origins || '*');
+  const jsonResp = (data, status = 200) => {
+    const resp = json(data, status);
+    Object.entries(cors).forEach(([k, v]) => resp.headers.set(k, v));
+    return resp;
+  };
 
   try {
+    // ========== 文章密码认证（5次/1小时限制）==========
+    if (path === '/api/post-auth' && method === 'POST') {
+      try {
+        const body = await request.json();
+        const { postId, password } = body;
+        if (!postId || !password) return json({ success: false, error: '参数错误' }, 400);
+
+        const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+        const rateKey = 'post_auth_rate_' + clientIP + '_' + postId;
+        try {
+          const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(rateKey).first();
+          if (row) {
+            const attempts = JSON.parse(row.value);
+            const recent = attempts.filter(t => Date.now() - t < 3600000);
+            if (recent.length >= 5) {
+              return json({ success: false, error: '密码错误次数过多，请 1 小时后再试' }, 429);
+            }
+          }
+        } catch (e) {}
+
+        const post = await env.DB.prepare("SELECT password FROM posts WHERE id=? AND status='published'").bind(postId).first();
+        if (!post) return json({ success: false, error: '文章不存在' }, 404);
+        if (post.password === password) {
+          try { await env.DB.prepare("DELETE FROM settings WHERE key=?").bind(rateKey).run(); } catch (e) {}
+          const timestamp = Date.now();
+          const encoder = new TextEncoder();
+          const key = await crypto.subtle.importKey('raw', encoder.encode('post_' + postId + '_' + password), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+          const sig = await crypto.subtle.sign('HMAC', key, encoder.encode('post_auth:' + timestamp));
+          const sigHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+          const cookieValue = timestamp + '.' + sigHex;
+          const resp = json({ success: true });
+          resp.headers.set('Set-Cookie', 'post_auth_' + postId + '=' + cookieValue + '; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400');
+          return resp;
+        }
+        try {
+          const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(rateKey).first();
+          let attempts = [];
+          if (row) { try { attempts = JSON.parse(row.value); } catch (e) {} }
+          attempts.push(Date.now());
+          attempts = attempts.filter(t => Date.now() - t < 3600000);
+          await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").bind(rateKey, JSON.stringify(attempts)).run();
+        } catch (e) {}
+        return json({ success: false, error: '密码错误' }, 401);
+      } catch (e) {
+        return json({ success: false, error: '认证失败' }, 500);
+      }
+    }
+
+    // ========== 全站密码认证（5次/1小时限制）==========
+    if (path === '/api/site-auth' && method === 'POST') {
+      try {
+        const body = await request.json();
+        const settings = await getSettings(env);
+        if (!settings.site_password) {
+          return json({ success: true, message: '未设置全站密码' });
+        }
+
+        // 速率限制检查
+        const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+        const rateKey = 'site_auth_rate_' + clientIP;
+        try {
+          const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(rateKey).first();
+          if (row) {
+            const attempts = JSON.parse(row.value);
+            const recent = attempts.filter(t => Date.now() - t < 3600000);
+            if (recent.length >= 5) {
+              return json({ success: false, error: '密码错误次数过多，请 1 小时后再试' }, 429);
+            }
+          }
+        } catch (e) {}
+
+        if (body.password === settings.site_password) {
+          // 成功，清除限制
+          try { await env.DB.prepare("DELETE FROM settings WHERE key=?").bind(rateKey).run(); } catch (e) {}
+          const timestamp = Date.now();
+          const encoder = new TextEncoder();
+          const key = await crypto.subtle.importKey('raw', encoder.encode(settings.site_password), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+          const sig = await crypto.subtle.sign('HMAC', key, encoder.encode('site_auth:' + timestamp));
+          const sigHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+          const cookieValue = timestamp + '.' + sigHex;
+          const resp = json({ success: true });
+          resp.headers.set('Set-Cookie', 'site_auth=' + cookieValue + '; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400');
+          return resp;
+        }
+        // 记录失败尝试
+        try {
+          const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(rateKey).first();
+          let attempts = [];
+          if (row) { try { attempts = JSON.parse(row.value); } catch (e) {} }
+          attempts.push(Date.now());
+          attempts = attempts.filter(t => Date.now() - t < 3600000);
+          await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").bind(rateKey, JSON.stringify(attempts)).run();
+        } catch (e) {}
+        return json({ success: false, error: '密码错误' }, 401);
+      } catch (e) {
+        return json({ success: false, error: '认证失败' }, 500);
+      }
+    }
+
     // ========== 登录接口 ==========
     if (path === '/api/login' && method === 'POST') {
       const body = await request.json();

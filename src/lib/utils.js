@@ -72,12 +72,23 @@ export function escapeHtml(str) {
 }
 
 /**
- * 获取 CORS 头（根据环境变量动态配置）
+ * 获取 CORS 头（支持多域名，从请求头 Origin 匹配）
+ * @param {Request} request - 请求对象
+ * @param {string} allowedOrigins - 逗号分隔的允许来源，"*" 表示全部允许
  */
-export function getCorsHeaders(env) {
-  const origin = (env && env.ALLOWED_ORIGIN) || '*';
+export function getCorsHeaders(request, allowedOrigins) {
+  const origins = (allowedOrigins || '*').split(',').map(s => s.trim()).filter(Boolean);
+  const requestOrigin = request.headers.get('Origin') || '';
+  let allowOrigin = '*';
+  if (origins.length === 1 && origins[0] === '*') {
+    allowOrigin = '*';
+  } else if (origins.includes(requestOrigin)) {
+    allowOrigin = requestOrigin;
+  } else {
+    allowOrigin = origins[0] || '*';
+  }
   return {
-    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Origin': allowOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization'
   };
@@ -86,9 +97,9 @@ export function getCorsHeaders(env) {
 /**
  * 处理 OPTIONS 预检请求
  */
-export function handleOptions(request, env) {
+export function handleOptions(request, allowedOrigins) {
   if (request.method === 'OPTIONS') {
-    return new Response(null, { headers: getCorsHeaders(env) });
+    return new Response(null, { headers: getCorsHeaders(request, allowedOrigins) });
   }
   return null;
 }

@@ -34,14 +34,28 @@ export function getPasswordHTML(post) {
     <a class="back" href="/">← 返回首页</a>
   </div>
   <script>
-    document.getElementById('pwdForm').onsubmit = function(e) {
+    document.getElementById('pwdForm').onsubmit = async function(e) {
       e.preventDefault();
       var pwd = document.getElementById('pwd').value;
       if (!pwd) return;
-      var d = new Date('${escapeHtml(post.created_at)}');
-      var year = d.getFullYear();
-      var month = String(d.getMonth() + 1).padStart(2, '0');
-      window.location.href = '/post/' + year + month + '/${post.id}?password=' + encodeURIComponent(pwd);
+      var errEl = document.getElementById('msg');
+      try {
+        var r = await fetch('/api/post-auth', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({postId: ${post.id}, password: pwd})
+        });
+        var d = await r.json();
+        if (d.success) {
+          window.location.reload();
+        } else {
+          errEl.textContent = d.error || '密码错误';
+          errEl.style.display = 'block';
+        }
+      } catch(e) {
+        errEl.textContent = '请求失败，请重试';
+        errEl.style.display = 'block';
+      }
     };
   </script>
 </body>

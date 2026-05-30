@@ -18,9 +18,9 @@ database_id = "a55bc271-25cb-4a47-a4aa-5dca0d176933"
 binding = "R2"
 bucket_name = "blog-images"
 
-# CORS 配置（不要在此处填写域名，请在 Cloudflare Dashboard 设置环境变量）
-[vars]
-ALLOWED_ORIGIN = "*"
+# CORS 配置已迁移至后台网站设置中
+# [vars]
+# ALLOWED_ORIGIN = "*"
 
 [observability]
 enabled = true

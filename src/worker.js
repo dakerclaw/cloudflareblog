@@ -27,16 +27,36 @@ function ensureDB(env) {
 
 export default {
   async fetch(request, env, ctx) {
+    // 初始化数据库并获取设置
+    await ensureDB(env);
+    const siteSettings = await getSettings(env);
+
     // 处理 CORS 预检请求
-    const optionsResponse = handleOptions(request, env);
+    const optionsResponse = handleOptions(request, siteSettings.allowed_origins || '*');
     if (optionsResponse) return optionsResponse;
 
     const url = new URL(request.url);
     const path = url.pathname;
 
     try {
-      // 初始化数据库（幂等操作，Promise 缓存避免重复执行）
-      await ensureDB(env);
+      // 全站密码保护检查
+      if (siteSettings.site_password && path !== '/api/site-auth') {
+        const cookie = request.headers.get('Cookie') || '';
+        const authMatch = cookie.match(/site_auth=([^;]+)/);
+        if (authMatch) {
+          // 验证 cookie 有效性（HMAC + 24小时过期）
+          const valid = await verifySiteAuth(authMatch[1], siteSettings.site_password);
+          if (!valid) {
+            return showSitePasswordPage(siteSettings);
+          }
+        } else {
+          // API 请求返回 401
+          if (path.startsWith('/api/')) {
+            return json({ error: '需要全站密码' }, 401);
+          }
+          return showSitePasswordPage(siteSettings);
+        }
+      }
 
       // ========== 路由分发 ==========
 
@@ -95,6 +115,110 @@ async function handleFrontendPage(request, env, ctx) {
     const settings = await getSettings(env);
     return html(getFrontendHTML(settings));
   }, 300); // 缓存 5 分钟
+}
+
+/**
+ * 验证文章密码 cookie
+ */
+async function verifyPostAuth(cookieValue, password, postId) {
+  try {
+    const parts = cookieValue.split('.');
+    if (parts.length !== 2) return false;
+    const timestamp = parseInt(parts[0]);
+    if (isNaN(timestamp)) return false;
+    if (Date.now() - timestamp > 86400000) return false;
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey('raw', encoder.encode('post_' + postId + '_' + password), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    const sig = await crypto.subtle.sign('HMAC', key, encoder.encode('post_auth:' + timestamp));
+    const expected = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+    return parts[1] === expected;
+  } catch { return false; }
+}
+
+/**
+ * 验证全站密码 cookie
+ */
+async function verifySiteAuth(cookieValue, password) {
+  try {
+    const parts = cookieValue.split('.');
+    if (parts.length !== 2) return false;
+    const timestamp = parseInt(parts[0]);
+    if (isNaN(timestamp)) return false;
+    // 24小时过期
+    if (Date.now() - timestamp > 86400000) return false;
+    // 验证签名
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey('raw', encoder.encode(password), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    const sig = await crypto.subtle.sign('HMAC', key, encoder.encode('site_auth:' + timestamp));
+    const expected = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+    return parts[1] === expected;
+  } catch { return false; }
+}
+
+/**
+ * 显示全站密码页面
+ */
+function showSitePasswordPage(settings) {
+  const siteName = settings.site_name || '我的博客';
+  const favicon = settings.site_favicon || '';
+  return new Response(`<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>访问验证 - ${siteName}</title>
+  ${favicon ? '<link rel="icon" href="' + favicon + '">' : ''}
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: Nunito, 'Noto Sans SC', sans-serif; background: #f8f8f0; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .box { background: #f7f3df; padding: 48px; border-radius: 20px; box-shadow: 0 4px 10px rgba(107,92,67,0.42); text-align: center; border: 2px solid #e8e0cc; max-width: 400px; width: 90%; }
+    h2 { margin-bottom: 8px; color: #794f27; font-weight: 700; font-size: 1.4em; }
+    p { color: #9f927d; margin-bottom: 24px; font-size: 0.9em; }
+    input { width: 100%; padding: 14px 20px; border: 2.5px solid #c4b89e; border-radius: 50px; font-size: 15px; margin-bottom: 16px; background: #f8f8f0; color: #725d42; box-sizing: border-box; outline: none; box-shadow: 0 3px 0 0 #d4c9b4; transition: all 0.25s; }
+    input:focus { border-color: #19c8b9; box-shadow: 0 3px 0 0 #11a89b; }
+    button { width: 100%; padding: 14px; background: #19c8b9; color: #fff; border: none; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 5px 0 0 #11a89b; transition: all 0.25s; }
+    button:hover { transform: translateY(-1px); box-shadow: 0 6px 0 0 #11a89b; }
+    button:active { transform: translateY(2px); box-shadow: 0 1px 0 0 #11a89b; }
+    .error { color: #e05a5a; margin-top: 12px; font-size: 0.9em; display: none; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>🔒 ${siteName}</h2>
+    <p>请输入访问密码</p>
+    <form id="authForm">
+      <input type="password" id="pwd" placeholder="请输入密码" autofocus>
+      <button type="submit">进入</button>
+    </form>
+    <div class="error" id="error">密码错误，请重试</div>
+  </div>
+  <script>
+    document.getElementById('authForm').onsubmit = async function(e) {
+      e.preventDefault();
+      var pwd = document.getElementById('pwd').value;
+      if (!pwd) return;
+      try {
+        var r = await fetch('/api/site-auth', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({password: pwd})
+        });
+        var d = await r.json();
+        if (d.success) {
+          window.location.reload();
+        } else {
+          document.getElementById('error').style.display = 'block';
+        }
+      } catch(e) {
+        document.getElementById('error').style.display = 'block';
+      }
+    };
+  </script>
+</body>
+</html>`, {
+    headers: { 'Content-Type': 'text/html; charset=utf-8' }
+  });
 }
 
 /**
@@ -184,7 +308,18 @@ async function renderPostPage(env, id, providedPassword) {
 
   // 检查密码保护
   if (post.password && post.password !== '') {
-    if (providedPassword !== post.password) {
+    // 检查 cookie
+    const cookie = request.headers.get('Cookie') || '';
+    const authMatch = cookie.match(new RegExp('post_auth_' + id + '=([^;]+)'));
+    let authenticated = false;
+    if (authMatch) {
+      authenticated = await verifyPostAuth(authMatch[1], post.password, id);
+    }
+    // 兼容 URL 参数（旧方式）
+    if (providedPassword === post.password) {
+      authenticated = true;
+    }
+    if (!authenticated) {
       return html(getPasswordHTML(post));
     }
   }
