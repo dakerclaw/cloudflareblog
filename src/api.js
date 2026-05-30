@@ -37,12 +37,12 @@ export async function handleAPI(request, env, path) {
               return json({ success: false, error: '密码错误次数过多，请 1 小时后再试' }, 429);
             }
           }
-        } catch (e) {}
+        } catch (e) { console.error(e); }
 
         const post = await env.DB.prepare("SELECT password FROM posts WHERE id=? AND status='published'").bind(postId).first();
         if (!post) return json({ success: false, error: '文章不存在' }, 404);
         if (post.password === password) {
-          try { await env.DB.prepare("DELETE FROM settings WHERE key=?").bind(rateKey).run(); } catch (e) {}
+          try { await env.DB.prepare("DELETE FROM settings WHERE key=?").bind(rateKey).run(); } catch (e) { console.error(e); }
           const timestamp = Date.now();
           const encoder = new TextEncoder();
           const key = await crypto.subtle.importKey('raw', encoder.encode('post_' + postId + '_' + password), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
@@ -56,11 +56,11 @@ export async function handleAPI(request, env, path) {
         try {
           const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(rateKey).first();
           let attempts = [];
-          if (row) { try { attempts = JSON.parse(row.value); } catch (e) {} }
+          if (row) { try { attempts = JSON.parse(row.value); } catch (e) { console.error(e); } }
           attempts.push(Date.now());
           attempts = attempts.filter(t => Date.now() - t < 3600000);
           await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").bind(rateKey, JSON.stringify(attempts)).run();
-        } catch (e) {}
+        } catch (e) { console.error(e); }
         return json({ success: false, error: '密码错误' }, 401);
       } catch (e) {
         return json({ success: false, error: '认证失败' }, 500);
@@ -88,11 +88,11 @@ export async function handleAPI(request, env, path) {
               return json({ success: false, error: '密码错误次数过多，请 1 小时后再试' }, 429);
             }
           }
-        } catch (e) {}
+        } catch (e) { console.error(e); }
 
         if (body.password === settings.site_password) {
           // 成功，清除限制
-          try { await env.DB.prepare("DELETE FROM settings WHERE key=?").bind(rateKey).run(); } catch (e) {}
+          try { await env.DB.prepare("DELETE FROM settings WHERE key=?").bind(rateKey).run(); } catch (e) { console.error(e); }
           const timestamp = Date.now();
           const encoder = new TextEncoder();
           const key = await crypto.subtle.importKey('raw', encoder.encode(settings.site_password), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
@@ -107,11 +107,11 @@ export async function handleAPI(request, env, path) {
         try {
           const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(rateKey).first();
           let attempts = [];
-          if (row) { try { attempts = JSON.parse(row.value); } catch (e) {} }
+          if (row) { try { attempts = JSON.parse(row.value); } catch (e) { console.error(e); } }
           attempts.push(Date.now());
           attempts = attempts.filter(t => Date.now() - t < 3600000);
           await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").bind(rateKey, JSON.stringify(attempts)).run();
-        } catch (e) {}
+        } catch (e) { console.error(e); }
         return json({ success: false, error: '密码错误' }, 401);
       } catch (e) {
         return json({ success: false, error: '认证失败' }, 500);
@@ -137,10 +137,10 @@ export async function handleAPI(request, env, path) {
             return json({ success: false, error: '登录尝试次数过多，请 10 分钟后再试' }, 429);
           }
         }
-      } catch (e) {}
+      } catch (e) { console.error(e); }
 
       if (body.password === env.ADMIN_PASSWORD) {
-        try { await env.DB.prepare("DELETE FROM settings WHERE key=?").bind(rateKey).run(); } catch (e) {}
+        try { await env.DB.prepare("DELETE FROM settings WHERE key=?").bind(rateKey).run(); } catch (e) { console.error(e); }
         const token = await generateToken(env.ADMIN_PASSWORD);
         return json({ success: true, token });
       }
@@ -149,11 +149,11 @@ export async function handleAPI(request, env, path) {
       try {
         const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(rateKey).first();
         let attempts = [];
-        if (row) { try { attempts = JSON.parse(row.value); } catch (e) {} }
+        if (row) { try { attempts = JSON.parse(row.value); } catch (e) { console.error(e); } }
         attempts.push(Date.now());
         attempts = attempts.filter(t => Date.now() - t < 600000);
         await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").bind(rateKey, JSON.stringify(attempts)).run();
-      } catch (e) {}
+      } catch (e) { console.error(e); }
 
       return json({ success: false, error: '密码错误' }, 401);
     }

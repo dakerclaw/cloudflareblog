@@ -355,6 +355,8 @@ export function getPostHTML(post, settings) {
         html = html.replace(placeholder, block);
       }
 
+      // 给所有图片添加懒加载（在插入 DOM 前）
+      html = html.split('<img ').join('<img loading="lazy" ');
       document.getElementById('post-content').innerHTML = html;
 
       // 为代码块添加复制按钮

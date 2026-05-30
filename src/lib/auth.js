@@ -86,7 +86,7 @@ export async function authenticateRequest(request, env) {
       const serverVersion = row ? parseInt(row.value) || 0 : 0;
       // 从 token 中提取版本号（嵌入在签名中）
       // 简化方案：token 过期即失效，手动注销通过前端清除实现
-    } catch (e) {}
+    } catch (e) { console.error("[Auth]", e); }
   }
 
   return true;
