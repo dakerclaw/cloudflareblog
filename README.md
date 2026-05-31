@@ -89,7 +89,7 @@ src/
 wrangler.toml              # Cloudflare 配置
 ```
 
-## 部署步骤（GitHub 自动部署）
+## 部署步骤
 
 ### 1. 创建 D1 数据库
 
@@ -98,14 +98,11 @@ wrangler.toml              # Cloudflare 配置
 3. 点击 **Create database**，名称输入 `blog-db`
 4. 复制 **Database ID**
 
-### 2. 创建 R2 存储桶（可选）
+### 2. 配置 D1 Database ID（二选一）
 
-1. 进入 **Workers & Pages** → **R2**
-2. 点击 **Create bucket**，名称输入 `blog-images`
+**方式一：修改 wrangler.toml（适合私有仓库）**
 
-### 3. 修改 wrangler.toml
-
-编辑 `wrangler.toml`，填入你的 D1 Database ID：
+编辑 `wrangler.toml`，将 `database_id` 替换为你的 D1 Database ID：
 
 ```toml
 [[d1_databases]]
@@ -114,13 +111,46 @@ database_name = "blog-db"
 database_id = "你的-D1-Database-ID"
 ```
 
-### 4. 推送到 GitHub
+**方式二：使用环境变量（适合公开仓库，推荐）**
+
+保持 `wrangler.toml` 中 `database_id = "${DB_ID}"` 不变，在 Cloudflare Dashboard 中设置：
+
+1. 进入 Worker → **Settings** → **Variables and Secrets**
+2. 添加变量 `DB_ID`，类型选择 **Secret**，值为你的 D1 Database ID
+
+> 💡 方式二可以避免将 Database ID 提交到公开仓库中。
+
+### 3. 创建 R2 存储桶（可选）
+
+R2 存储桶用于存储文章封面图片等静态资源。
+
+| 绑定 R2 | 不绑定 R2 |
+|---------|----------|
+| 图片上传到 R2 存储，通过 `/images/xxx` 路径访问 | 图片以 base64 格式内嵌在文章中 |
+| 图片独立存储，不占用 Worker 响应体积 | 图片数据随文章内容返回，增加响应体积 |
+| 支持长期缓存（1年），加载更快 | 每次请求都传输图片数据 |
+| 适合有大量图片的博客 | 适合少量图片或纯文字博客 |
+
+如需绑定 R2：
+
+1. 进入 **Workers & Pages** → **R2**
+2. 点击 **Create bucket**，名称输入 `blog-images`
+3. `wrangler.toml` 中已预配置 R2 绑定，无需额外修改
+
+### 4. 获取项目代码（二选一）
+
+**方式一：Fork 仓库（推荐）**
+
+1. 在 GitHub 上 Fork 本仓库到你的账号
+2. 后续可同步上游更新
+
+**方式二：克隆到新仓库**
 
 ```bash
-git init
-git add .
-git commit -m "Init blog"
-git remote add origin https://github.com/你的用户名/cloudflare-light-blog.git
+git clone https://github.com/你的用户名/cloudflare-light-blog.git
+cd cloudflare-light-blog
+# 如需推送到自己的仓库
+git remote set-url origin https://github.com/你的用户名/cloudflare-light-blog.git
 git push -u origin main
 ```
 
@@ -128,7 +158,7 @@ git push -u origin main
 
 1. Cloudflare Dashboard → **Workers & Pages** → **Create Application**
 2. 选择 **Workers** → **Connect to Git**
-3. 选择你的 GitHub 仓库
+3. 选择你的 GitHub 仓库（Fork 的仓库或自己的仓库）
 4. 在构建配置中填写：
 
 | 配置项 | 填写内容 |
@@ -155,7 +185,9 @@ git push -u origin main
 
 ### 7. 后续更新
 
-每次推送到 GitHub `main` 分支，Cloudflare 会自动重新部署：
+**Fork 用户：** 在 GitHub 上点击 **Sync fork** 同步上游更新，Cloudflare 会自动重新部署。
+
+**自有仓库用户：** 推送到 `main` 分支即可自动部署：
 
 ```bash
 git add .
