@@ -354,13 +354,14 @@ export function getAdminHTML() {
                             <label>封面图片</label>
                             <input v-model="form.cover_image" @input="coverPreview=form.cover_image" placeholder="输入外链地址" style="width:100%;margin-bottom:8px">
                             <div style="display:flex;gap:12px;align-items:center;justify-content:center">
-                              <div style="width:200px;height:200px;border:2px dashed #c4b89e;border-radius:12px;background:#f0e8d8;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">
-                                <img v-if="coverPreview" :src="coverPreview" style="width:200px;height:200px;object-fit:cover">
-                                <p v-else style="color:#9f927d;font-size:13px">暂无封面</p>
+                              <div @dragover.prevent="$event.currentTarget.style.borderColor='#19c8b9'" @dragleave="$event.currentTarget.style.borderColor='#c4b89e'" @drop.prevent="$event.currentTarget.style.borderColor='#c4b89e';handleCoverDrop($event)" @click="$event.currentTarget.querySelector('input[type=file]').click()" style="width:200px;height:200px;border:2px dashed #c4b89e;border-radius:12px;background:#f0e8d8;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;cursor:pointer;transition:border-color 0.2s">
+                                <input type="file" @change="handleCoverChange" accept="image/*" @click.stop style="display:none">
+                                <img v-if="coverPreview" :src="coverPreview" style="width:200px;height:200px;object-fit:cover;pointer-events:none">
+                                <p v-else style="color:#9f927d;font-size:13px;pointer-events:none">点击或拖拽上传</p>
                               </div>
                               <div style="display:flex;flex-direction:column;gap:8px">
-                                <button @click="$refs.editFileInput.click()" style="padding:8px 20px;background:#19c8b9;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #11a89b;white-space:nowrap">{{coverPreview ? '更换' : '上传'}}</button>
-                                <input ref="editFileInput" type="file" @change="handleCoverChange" accept="image/*" style="display:none">
+                                <button type="button" @click="$event.target.closest('div').querySelector('input[type=file]').click()" style="padding:8px 20px;background:#19c8b9;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #11a89b;white-space:nowrap">{{coverPreview ? '更换' : '上传'}}</button>
+                                <input type="file" @change="handleCoverChange" accept="image/*" style="display:none">
                                 <button v-if="coverPreview" @click="deleteCover" style="padding:8px 20px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #c94444;white-space:nowrap">删除</button>
                               </div>
                             </div>
@@ -602,6 +603,7 @@ export function getAdminHTML() {
         const deleteCategory = async (id) => { const c = await showConfirm('确认删除', '确定？'); if (!c) return; try { await api('/api/category?id=' + id, { method: 'DELETE' }); loadCategories(); showToast('已删除'); } catch (e) { showToast('删除分类失败'); } };
         const saveSettings = async () => { try { const r = await api('/api/settings', { method: 'POST', data: settingsForm.value }); if (r.data && r.data.success) { showToast('保存成功'); } else { alert('保存失败: ' + (r.data ? r.data.error : '未知错误')); } } catch (e) { console.error('保存设置错误:', e); alert('保存失败: ' + (e.response ? e.response.data.error || e.response.statusText : e.message)); } };
         const handleCoverChange = async (e) => { const f = e.target.files[0]; if (f) await uploadFile(f); };
+        const handleCoverDrop = async (e) => { const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) await uploadFile(f); };
         const handleDrop = async (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) await uploadFile(f); };
         const uploadFile = async (f) => { if (f.size > 2097152) { alert('文件大小不能超过 2MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) { form.value.cover_image = d.url; coverPreview.value = d.url; } };
         const handleAvatarDrop = async (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) { const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.site_avatar = d.url; } };
@@ -726,7 +728,7 @@ export function getAdminHTML() {
 
         watch(currentPage, (v) => { localStorage.setItem('adminPage', v); });
         onMounted(() => { check(); document.addEventListener('click', closeAllSelects); });
-        return { logged, username, password, login, logout, posts, editingId, form, coverPreview, toast, openAdd, cancelNewPost, toggleEdit, handleCoverChange, handleDrop, deleteCover, savePost, deletePost, categories, currentPage, postPage, postPageSize, categoryForm, saveCategory, deleteCategory, editCategory, editingCategory, settingsForm, saveSettings, handleFavicon, handleFaviconDrop, handleAvatar, handleAvatarDrop, trashPosts, restorePost, permanentDelete, confirmModal, showConfirm, insertMd, applyTheme, customSelects, toggleSelect, selectOption, getSelectLabel };
+        return { logged, username, password, login, logout, posts, editingId, form, coverPreview, toast, openAdd, cancelNewPost, toggleEdit, handleCoverChange, handleCoverDrop, handleDrop, deleteCover, savePost, deletePost, categories, currentPage, postPage, postPageSize, categoryForm, saveCategory, deleteCategory, editCategory, editingCategory, settingsForm, saveSettings, handleFavicon, handleFaviconDrop, handleAvatar, handleAvatarDrop, trashPosts, restorePost, permanentDelete, confirmModal, showConfirm, insertMd, applyTheme, customSelects, toggleSelect, selectOption, getSelectLabel };
       }
     }).mount('#app');
   <\/script>

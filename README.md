@@ -98,7 +98,7 @@ wrangler.toml              # Cloudflare 配置
 3. 点击 **Create database**，名称输入 `blog-db`
 4. 复制 **Database ID**
 
-### 2. 配置 D1 Database ID（二选一）
+### 2. 配置 D1 数据库绑定（三选一）
 
 **方式一：修改 wrangler.toml（适合私有仓库）**
 
@@ -111,14 +111,25 @@ database_name = "blog-db"
 database_id = "你的-D1-Database-ID"
 ```
 
-**方式二：使用环境变量（适合公开仓库，推荐）**
+**方式二：通过 Dashboard 绑定（推荐，无需修改代码）**
 
-保持 `wrangler.toml` 中 `database_id = "${DB_ID}"` 不变，在 Cloudflare Dashboard 中设置：
+1. 进入 Cloudflare Dashboard → **Workers & Pages** → 你的 Worker
+2. 点击 **Settings** → **Bindings** → **Add**
+3. 选择 **D1 Database**，变量名填 `DB`，选择你创建的 `blog-db` 数据库
+4. 保存后重新部署
 
-1. 进入 Worker → **Settings** → **Variables and Secrets**
-2. 添加变量 `DB_ID`，类型选择 **Secret**，值为你的 D1 Database ID
+> 💡 Dashboard 绑定优先级高于 `wrangler.toml`，两者会自动合并。此方式无需在代码中写入 Database ID。
 
-> 💡 方式二可以避免将 Database ID 提交到公开仓库中。
+**方式三：使用环境变量（仅限本地 Wrangler CLI 部署）**
+
+在 `wrangler.toml` 中使用 `database_id = "${DB_ID}"`，本地部署前设置环境变量：
+
+```bash
+export DB_ID="你的-D1-Database-ID"
+npx wrangler deploy
+```
+
+> ⚠️ 此方式仅适用于本地 CLI 部署，GitHub 自动部署不支持环境变量替换。
 
 ### 3. 创建 R2 存储桶（可选）
 

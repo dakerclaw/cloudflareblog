@@ -9,9 +9,8 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "blog-db"
-# 第一个直接写入ID，第二个使用变量，如果两个都注释了，请去手动绑定
-# database_id = "DB_ID"
-# database_id = "${DB_ID}"
+database_id = "a55bc271-25cb-4a47-a4aa-5dca0d176933"
+#database_id = "${DB_ID}"
 
 # ============================================
 # R2 存储绑定
