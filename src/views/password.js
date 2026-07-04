@@ -26,6 +26,7 @@ export function getPasswordHTML(post) {
   <div class="box">
     <h2>🔒 文章密码保护</h2>
     <p style="color:#666;margin-bottom:20px">请输入密码访问文章</p>
+    <div id="msg" style="display:none;color:#e05a5a;font-size:14px;margin-bottom:12px;padding:8px 12px;background:#fef2f2;border:2px solid #fecaca;border-radius:8px"></div>
     <form id="pwdForm">
       <input type="password" id="pwd" placeholder="请输入密码" autofocus>
       <br>

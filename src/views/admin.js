@@ -46,6 +46,16 @@ export function getAdminHTML() {
     .btn-import:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #d35400; }
     .btn-pin { background: linear-gradient(135deg, #ffd700, #ffa500); box-shadow: 0 4px 0 0 #cc8400; color: #725d42; }
     .btn-pin:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #cc8400; }
+    /* 美化单选按钮样式 */
+    .radio-group { display: flex; gap: 12px; margin-top: 8px; }
+    .radio-item { position: relative; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .radio-item input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+    .radio-item .radio-custom { width: 20px; height: 20px; border: 2.5px solid #c4b89e; border-radius: 50%; background: #f8f8f0; transition: all 0.25s ease; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 0 0 #d4c9b4; }
+    .radio-item .radio-custom::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.25s ease; }
+    .radio-item input[type="radio"]:checked + .radio-custom { border-color: #19c8b9; box-shadow: 0 2px 0 0 #11a89b; }
+    .radio-item input[type="radio"]:checked + .radio-custom::after { background: linear-gradient(135deg, #19c8b9, #11a89b); }
+    .radio-item:hover .radio-custom { border-color: #19c8b9; }
+    .radio-item .radio-label { font-size: 14px; color: #725d42; font-weight: 500; user-select: none; }
     .card { background: var(--card-bg, #f7f3df); border-radius: 20px; padding: 24px; box-shadow: 0 4px 10px rgba(107,92,67,0.42); border: 2px solid var(--card-border, #e8e0cc); margin-bottom: 16px; }
     .form-group { margin-bottom: 18px; }
     .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #794f27; }
@@ -484,19 +494,21 @@ export function getAdminHTML() {
               <div class="form-group"><label>网站副标题</label><input v-model="settingsForm.site_description"></div>
               <div class="form-group">
                 <label>网站图标</label>
-                <div style="display:flex;gap:12px;align-items:flex-start">
-                  <div class="cover-upload" @click="$refs.faviconInput.click()" @dragover.prevent @drop.prevent="handleFaviconDrop" style="width:80px;height:80px;padding:12px;border:2px dashed #c4b89e;border-radius:12px;background:#f0e8d8;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                  <span style="color:#9f927d;font-size:14px">预览：</span>
+                  <div style="width:36px;height:36px;border:2px solid #e8e0cc;border-radius:8px;background:#f0e8d8;display:flex;align-items:center;justify-content:center;overflow:hidden">
+                    <img v-if="settingsForm.site_favicon && settingsForm.site_favicon.startsWith('http')" :src="settingsForm.site_favicon" style="width:32px;height:32px;object-fit:cover">
+                    <span v-else-if="settingsForm.site_favicon" style="font-size:20px">{{settingsForm.site_favicon}}</span>
+                    <span v-else style="color:#9f927d;font-size:12px">无</span>
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <input v-model="settingsForm.site_favicon" placeholder="输入emoji或图片地址" style="flex:1">
+                  <div @click="$refs.faviconInput.click()" style="padding:6px 12px;background:#19c8b9;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap">
                     <input ref="faviconInput" type="file" @change="handleFavicon" accept=".ico,image/*" style="display:none">
-                    <div v-if="!settingsForm.site_favicon"><p style="color:#9f927d;font-size:12px">上传</p></div>
-                    <img v-else :src="settingsForm.site_favicon" style="width:64px;height:64px;border-radius:50%">
+                    更换
                   </div>
-                  <div style="flex:1">
-                    <input v-model="settingsForm.site_favicon" placeholder="或输入外链地址" style="width:100%;margin-bottom:6px">
-                    <div v-if="settingsForm.site_favicon" style="display:flex;gap:4px">
-                      <button @click="$refs.faviconInput.click()" style="padding:4px 10px;background:#19c8b9;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:12px;font-weight:600;box-shadow:0 2px 0 0 #11a89b">更换</button>
-                      <button @click="settingsForm.site_favicon=''" style="padding:4px 10px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:12px;font-weight:600;box-shadow:0 2px 0 0 #c94444">删除</button>
-                    </div>
-                  </div>
+                  <button v-if="settingsForm.site_favicon" @click="settingsForm.site_favicon=''" style="padding:6px 12px;background:#e05a5a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap">清除</button>
                 </div>
               </div>
               <div class="form-group">
@@ -537,19 +549,21 @@ export function getAdminHTML() {
               <div class="form-group"><label>个人名称</label><input v-model="settingsForm.site_author"></div>
               <div class="form-group">
                 <label>个人头像</label>
-                <div style="display:flex;gap:12px;align-items:flex-start">
-                  <div class="cover-upload" @click="$refs.avatarInput.click()" @dragover.prevent @drop.prevent="handleAvatarDrop" style="width:80px;height:80px;padding:12px;border:2px dashed #c4b89e;border-radius:12px;background:#f0e8d8;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                  <span style="color:#9f927d;font-size:14px">预览：</span>
+                  <div style="width:36px;height:36px;border:2px solid #e8e0cc;border-radius:8px;background:#f0e8d8;display:flex;align-items:center;justify-content:center;overflow:hidden">
+                    <img v-if="settingsForm.site_avatar && settingsForm.site_avatar.startsWith('http')" :src="settingsForm.site_avatar" style="width:32px;height:32px;object-fit:cover">
+                    <span v-else-if="settingsForm.site_avatar" style="font-size:20px">{{settingsForm.site_avatar}}</span>
+                    <span v-else style="color:#9f927d;font-size:12px">无</span>
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <input v-model="settingsForm.site_avatar" placeholder="输入emoji或图片地址" style="flex:1">
+                  <div @click="$refs.avatarInput.click()" style="padding:6px 12px;background:#19c8b9;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap">
                     <input ref="avatarInput" type="file" @change="handleAvatar" accept="image/*" style="display:none">
-                    <div v-if="!settingsForm.site_avatar"><p style="color:#9f927d;font-size:12px">上传</p></div>
-                    <img v-else :src="settingsForm.site_avatar" style="width:64px;height:64px;border-radius:50%">
+                    更换
                   </div>
-                  <div style="flex:1">
-                    <input v-model="settingsForm.site_avatar" placeholder="或输入外链地址" style="width:100%;margin-bottom:6px">
-                    <div v-if="settingsForm.site_avatar" style="display:flex;gap:4px">
-                      <button @click="$refs.avatarInput.click()" style="padding:4px 10px;background:#19c8b9;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:12px;font-weight:600;box-shadow:0 2px 0 0 #11a89b">更换</button>
-                      <button @click="settingsForm.site_avatar=''" style="padding:4px 10px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:12px;font-weight:600;box-shadow:0 2px 0 0 #c94444">删除</button>
-                    </div>
-                  </div>
+                  <button v-if="settingsForm.site_avatar" @click="settingsForm.site_avatar=''" style="padding:6px 12px;background:#e05a5a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap">清除</button>
                 </div>
               </div>
               <div class="form-group"><label>个人简介</label><textarea v-model="settingsForm.site_bio" rows="3"></textarea></div>
@@ -614,36 +628,46 @@ export function getAdminHTML() {
               </div>
               <div class="form-group">
                 <label>标签云开关</label>
-                <div style="display:flex;gap:20px;margin-top:8px">
-                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#725d42">
-                    <input type="checkbox" :true-value="'1'" :false-value="'0'" v-model="settingsForm.enable_tag_cloud" style="width:18px;height:18px;cursor:pointer">
-                    显示标签云模块
+                <div class="radio-group">
+                  <label class="radio-item">
+                    <input type="radio" value="1" v-model="settingsForm.enable_tag_cloud">
+                    <span class="radio-custom"></span>
+                    <span class="radio-label">显示</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" value="0" v-model="settingsForm.enable_tag_cloud">
+                    <span class="radio-custom"></span>
+                    <span class="radio-label">不显示</span>
                   </label>
                 </div>
               </div>
               <div class="form-group">
                 <label>个人简介位置</label>
-                <div style="display:flex;gap:20px;margin-top:8px">
-                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#725d42">
-                    <input type="radio" value="left" v-model="settingsForm.profile_position" style="width:16px;height:16px;cursor:pointer">
-                    居左
+                <div class="radio-group">
+                  <label class="radio-item">
+                    <input type="radio" value="left" v-model="settingsForm.profile_position">
+                    <span class="radio-custom"></span>
+                    <span class="radio-label">居左</span>
                   </label>
-                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#725d42">
-                    <input type="radio" value="right" v-model="settingsForm.profile_position" style="width:16px;height:16px;cursor:pointer">
-                    居右
+                  <label class="radio-item">
+                    <input type="radio" value="right" v-model="settingsForm.profile_position">
+                    <span class="radio-custom"></span>
+                    <span class="radio-label">居右</span>
                   </label>
                 </div>
               </div>
               <div class="form-group">
                 <label>标签云位置</label>
-                <div style="display:flex;gap:20px;margin-top:8px">
-                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#725d42">
-                    <input type="radio" value="left" v-model="settingsForm.tag_cloud_position" style="width:16px;height:16px;cursor:pointer">
-                    居左
+                <div class="radio-group">
+                  <label class="radio-item">
+                    <input type="radio" value="left" v-model="settingsForm.tag_cloud_position">
+                    <span class="radio-custom"></span>
+                    <span class="radio-label">居左</span>
                   </label>
-                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#725d42">
-                    <input type="radio" value="right" v-model="settingsForm.tag_cloud_position" style="width:16px;height:16px;cursor:pointer">
-                    居右
+                  <label class="radio-item">
+                    <input type="radio" value="right" v-model="settingsForm.tag_cloud_position">
+                    <span class="radio-custom"></span>
+                    <span class="radio-label">居右</span>
                   </label>
                 </div>
               </div>

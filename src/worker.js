@@ -133,14 +133,14 @@ async function deriveHMACKey(password, info) {
 /**
  * 验证文章密码 cookie
  */
-async function verifyPostAuth(cookieValue, password, postId) {
+async function verifyPostAuth(cookieValue, passwordHash, postId) {
   try {
     const parts = cookieValue.split('.');
     if (parts.length !== 2) return false;
     const timestamp = parseInt(parts[0]);
     if (isNaN(timestamp)) return false;
     if (Date.now() - timestamp > 86400000) return false;
-    const key = await deriveHMACKey(password, 'post-auth-' + postId);
+    const key = await deriveHMACKey(passwordHash, 'post-auth-' + postId);
     const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode('post_auth:' + timestamp));
     const expected = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
     return parts[1] === expected;
