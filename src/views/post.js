@@ -292,29 +292,29 @@ export function getPostHTML(post, settings) {
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js" crossorigin="anonymous"></script>
   <style>
-    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; margin: 16px 0; border: 1px solid #30363d; box-shadow: 0 4px 16px rgba(0,0,0,0.3); position: relative; }
-    .copy-btn { position: absolute; top: 8px; right: 8px; padding: 4px 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: rgba(255,255,255,0.6); font-size: 12px; cursor: pointer; transition: all 0.2s; z-index: 1; }
-    .copy-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+    pre { background: #2b2118; border-radius: 20px; padding: 20px 24px; overflow-x: auto; margin: 14px 0; border: 1px solid #3d3028; box-shadow: none; position: relative; }
+    .copy-btn { position: absolute; top: 8px; right: 8px; padding: 4px 12px; background: rgba(232,213,188,0.1); border: 1px solid rgba(232,213,188,0.2); border-radius: 6px; color: rgba(232,213,188,0.6); font-size: 12px; cursor: pointer; transition: all 0.2s; z-index: 1; }
+    .copy-btn:hover { background: rgba(232,213,188,0.2); color: #e8d5bc; }
     .copy-btn.copied { background: rgba(25,200,185,0.3); color: #19c8b9; border-color: #19c8b9; }
     pre::before { content: ''; position: absolute; top: 12px; left: 16px; width: 12px; height: 12px; border-radius: 50%; background: #ff5f57; box-shadow: 20px 0 0 #febc2e, 40px 0 0 #28c840; }
-    pre code { font-family: 'Fira Code', 'Consolas', 'Monaco', monospace; font-size: 14px; line-height: 1.7; color: #e6edf3; background: none; padding: 0; border: none; border-radius: 0; box-shadow: none; display: block; padding-top: 20px; }
-    code { font-family: 'Fira Code', 'Consolas', 'Monaco', monospace; background: #1b2230; color: #e6edf3; padding: 3px 10px; border-radius: 6px; font-size: 0.88em; border: 1px solid #30363d; }
-    .hljs-keyword, .hljs-selector-tag { color: #ff7b72; }
-    .hljs-string, .hljs-attr { color: #a5d6ff; }
-    .hljs-number, .hljs-literal { color: #79c0ff; }
-    .hljs-comment { color: #8b949e; font-style: italic; }
-    .hljs-function .hljs-title, .hljs-title.function_ { color: #d2a8ff; }
-    .hljs-built_in { color: #ffa657; }
-    .hljs-type, .hljs-class .hljs-title { color: #ffa657; }
-    .hljs-params { color: #e6edf3; }
-    .hljs-meta { color: #79c0ff; }
-    .hljs-punctuation { color: #8b949e; }
-    .hljs-property { color: #79c0ff; }
-    .hljs-title { color: #d2a8ff; }
-    .hljs-emphasis { font-style: italic; color: #ffa657; }
-    .hljs-strong { font-weight: bold; color: #ffa657; }
-    .hljs-link { color: #a5d6ff; text-decoration: underline; }
-    .hljs-addition { color: #aff5b4; background: rgba(46,160,67,0.15); }
+    pre code { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace; font-size: 14px; line-height: 1.7; color: #e8d5bc; background: none; padding: 0; border: none; border-radius: 0; box-shadow: none; display: block; padding-top: 20px; font-weight: 600; }
+    code { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace; background: #3d3028; color: #e8d5bc; padding: 3px 10px; border-radius: 6px; font-size: 0.88em; border: 1px solid #4d4038; font-weight: 600; }
+    .hljs-keyword, .hljs-selector-tag { color: #d4a0e0; }
+    .hljs-string, .hljs-attr { color: #a8d4a0; }
+    .hljs-number, .hljs-literal { color: #80c0e0; }
+    .hljs-comment { color: #8b8070; font-style: italic; }
+    .hljs-function .hljs-title, .hljs-title.function_ { color: #e06c75; }
+    .hljs-built_in { color: #f0a870; }
+    .hljs-type, .hljs-class .hljs-title { color: #f0a870; }
+    .hljs-params { color: #e8d5bc; }
+    .hljs-meta { color: #80c0e0; }
+    .hljs-punctuation { color: #d4b896; }
+    .hljs-property { color: #80c0e0; }
+    .hljs-title { color: #e06c75; }
+    .hljs-emphasis { font-style: italic; color: #f0a870; }
+    .hljs-strong { font-weight: bold; color: #f0a870; }
+    .hljs-link { color: #a8d4a0; text-decoration: underline; }
+    .hljs-addition { color: #a8d4a0; background: rgba(46,160,67,0.15); }
     blockquote { position: relative; background: #f0ece2; border-left: 4px solid #c4b89e; border-radius: 0 12px 12px 0; padding: 16px 20px 16px 48px; margin: 16px 0; color: #6b5d45; font-style: italic; line-height: 1.8; }
     blockquote::before { content: '\\201C'; position: absolute; left: 14px; top: 8px; font-size: 48px; color: #c4b89e; font-family: Georgia, serif; line-height: 1; font-style: normal; }
     blockquote p { margin: 0; }
@@ -325,7 +325,7 @@ export function getPostHTML(post, settings) {
     details[open] summary::before { transform: rotate(90deg); }
     summary::-webkit-details-marker { display: none; }
     details > div, details > p { padding: 16px 20px; }
-    .hljs-deletion { color: #ffdcd7; background: rgba(248,81,73,0.15); }
+    .hljs-deletion { color: #e06c75; background: rgba(224,108,117,0.15); }
   </style>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -377,8 +377,16 @@ export function getPostHTML(post, settings) {
       // 第二步：用 marked 解析（代码块已被占位符替换，不会有 HTML 问题）
       var html;
       if (typeof marked !== 'undefined' && marked.parse) {
-        marked.setOptions({ breaks: true, gfm: true });
+        marked.setOptions({ breaks: true, gfm: true, headerIds: false, mangle: false });
         html = marked.parse(content);
+        // 净化 HTML：移除危险标签（script、iframe、object、embed、form）
+        html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+        html = html.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+        html = html.replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '');
+        html = html.replace(/<embed\b[^>]*>/gi, '');
+        html = html.replace(/<form\b[^<]*(?:(?!<\/form>)<[^<]*)*<\/form>/gi, '');
+        // 移除事件处理器（onclick、onerror等）
+        html = html.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
       } else {
         html = '<p>' + content.split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;').split(String.fromCharCode(10)).join('<br>') + '</p>';
       }

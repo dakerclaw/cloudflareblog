@@ -1,7 +1,7 @@
 // ==================== Cloudflare Light Blog - 主入口 ====================
 // 模块化架构 | HMAC 认证 | 分页 | 缓存 | SEO
 
-import { html, errorResponse, handleOptions, getCorsHeaders } from './lib/utils.js';
+import { html, errorResponse, handleOptions, getCorsHeaders, escapeHtml } from './lib/utils.js';
 import { initDB, getSettings } from './lib/db.js';
 import { authenticateRequest, verifyPasswordHash } from './lib/auth.js';
 import { handleImage } from './lib/image.js';
@@ -176,8 +176,8 @@ function showSitePasswordPage(settings) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>访问验证 - ${siteName}</title>
-  ${favicon ? '<link rel="icon" href="' + favicon + '">' : ''}
+  <title>访问验证 - ${escapeHtml(siteName)}</title>
+  ${favicon ? '<link rel="icon" href="' + escapeHtml(favicon) + '">' : ''}
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: Nunito, 'Noto Sans SC', sans-serif; background: #f8f8f0; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
@@ -194,7 +194,7 @@ function showSitePasswordPage(settings) {
 </head>
 <body>
   <div class="box">
-    <h2>🔒 ${siteName}</h2>
+    <h2>🔒 ${escapeHtml(siteName)}</h2>
     <p>请输入访问密码</p>
     <form id="authForm">
       <input type="password" id="pwd" placeholder="请输入密码" autofocus>

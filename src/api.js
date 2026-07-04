@@ -110,7 +110,7 @@ export async function handleAPI(request, env, path) {
           await clearRateLimit(env, rateKey);
           const cookieValue = await generatePostAuthCookie(postId, post.password);
           const resp = json({ success: true });
-          resp.headers.set('Set-Cookie', 'post_auth_' + postId + '=' + cookieValue + '; Path=/; HttpOnly; SameSite=Lax; Max-Age=' + COOKIE_MAX_AGE);
+          resp.headers.set('Set-Cookie', 'post_auth_' + postId + '=' + cookieValue + '; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=' + COOKIE_MAX_AGE);
           return resp;
         }
         return json({ success: false, error: '密码错误' }, 401);
@@ -135,11 +135,12 @@ export async function handleAPI(request, env, path) {
           return json({ success: false, error: '密码错误次数过多，请 1 小时后再试' }, 429);
         }
 
-        if (body.password === settings.site_password) {
+        // 使用哈希验证密码
+        if (await verifyPasswordHash(body.password, settings.site_password)) {
           await clearRateLimit(env, rateKey);
           const cookieValue = await generateSiteAuthCookie(settings.site_password);
           const resp = json({ success: true });
-          resp.headers.set('Set-Cookie', 'site_auth=' + cookieValue + '; Path=/; HttpOnly; SameSite=Lax; Max-Age=' + COOKIE_MAX_AGE);
+          resp.headers.set('Set-Cookie', 'site_auth=' + cookieValue + '; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=' + COOKIE_MAX_AGE);
           return resp;
         }
         // 记录失败尝试
