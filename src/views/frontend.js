@@ -110,7 +110,7 @@ export function getFrontendHTML(settings) {
     ${siteDesc ? `<p>${escapeHtml(siteDesc)}</p>` : ''}
   </header>
   <main>
-    <aside class="sidebar">
+    <aside class="sidebar" ${settings.profile_position === 'right' ? 'style="order:2"' : ''}>
       <div class="profile-card">
         ${siteAvatar ? `<img class="avatar" src="${escapeHtml(siteAvatar)}" alt="${escapeHtml(siteAuthor)}">` : `<img class="avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect fill='%23e8e0cc' width='80' height='80'/%3E%3Ctext x='40' y='45' text-anchor='middle' fill='%239f927d' font-size='32'%3E?%3C/text%3E%3C/svg%3E" alt="头像">`}
         <div class="name">${escapeHtml(siteAuthor)}</div>
@@ -124,13 +124,23 @@ export function getFrontendHTML(settings) {
           <div>建站时间：<span id="site-created">${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}</span></div>
           <div>最后更新：<span id="site-updated">-</span></div>
         </div>
-        <h4>📂 分类</h4>
+        <h4>${settings.category_icon ? (settings.category_icon.startsWith('http') || settings.category_icon.startsWith('/images/') ? '<img src="' + escapeHtml(settings.category_icon) + '" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">' : settings.category_icon + ' ') : '📂 '}分类</h4>
         <div id="category-list" class="category-list"></div>
-        <h4>🔗 ${escapeHtml(settings.links_title || '友链')}</h4>
+        <h4>${settings.links_icon ? (settings.links_icon.startsWith('http') || settings.links_icon.startsWith('/images/') ? '<img src="' + escapeHtml(settings.links_icon) + '" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">' : settings.links_icon + ' ') : '🔗 '}${escapeHtml(settings.links_title || '友链')}</h4>
         <div id="link-list" class="link-list"></div>
+        ${settings.enable_tag_cloud !== '0' && settings.tag_cloud_position === 'left' ? `
+        <h4>${settings.tag_cloud_icon ? (settings.tag_cloud_icon.startsWith('http') || settings.tag_cloud_icon.startsWith('/images/') ? '<img src="' + escapeHtml(settings.tag_cloud_icon) + '" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">' : settings.tag_cloud_icon + ' ') : '🏷️ '}标签云</h4>
+        <div id="tag-cloud" class="tag-cloud" style="display:flex;flex-wrap:wrap;gap:6px;padding:8px 0"></div>
+        ` : ''}
       </div>
     </aside>
-    <div class="post-list">
+    <div class="post-list" ${settings.profile_position === 'right' ? 'style="order:1"' : ''}>
+      ${settings.enable_tag_cloud !== '0' && settings.tag_cloud_position === 'right' ? `
+      <div style="margin-bottom:16px;padding:16px;background:#f7f3df;border-radius:20px;border:2px solid #e8e0cc">
+        <h4 style="margin-bottom:10px">${settings.tag_cloud_icon ? (settings.tag_cloud_icon.startsWith('http') || settings.tag_cloud_icon.startsWith('/images/') ? '<img src="' + escapeHtml(settings.tag_cloud_icon) + '" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">' : settings.tag_cloud_icon + ' ') : '🏷️ '}标签云</h4>
+        <div id="tag-cloud" class="tag-cloud" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      ` : ''}
       <div style="margin-bottom:16px">
         <input id="search-input" type="text" placeholder="搜索文章标题或标签……" style="width:100%;padding:12px 18px;border:2px solid #e8e0cc;border-radius:14px;font-size:15px;background:#f7f3df;color:#725d42;outline:none;transition:border-color 0.2s;box-shadow:0 2px 8px rgba(107,92,67,0.08)" onfocus="this.style.borderColor='#19c8b9'" onblur="this.style.borderColor='#e8e0cc'">
       </div>
@@ -175,9 +185,40 @@ export function getFrontendHTML(settings) {
       }
     });
 
+    // 加载标签云
+    var tagCloudEl = document.getElementById('tag-cloud');
+    if (tagCloudEl) {
+      fetch('/api/posts?limit=999').then(function(r){return r.json()}).then(function(res) {
+        var posts = res.data || [];
+        var tagMap = {};
+        posts.forEach(function(post) {
+          if (post.password) return; // 跳过有密码的文章
+          if (post.tags) {
+            post.tags.split(',').forEach(function(t) {
+              var tag = t.trim();
+              if (tag) {
+                tagMap[tag] = (tagMap[tag] || 0) + 1;
+              }
+            });
+          }
+        });
+        var tags = Object.keys(tagMap);
+        if (tags.length > 0) {
+          var sizes = [0.75, 0.85, 1, 1.15, 1.3];
+          tagCloudEl.innerHTML = tags.map(function(tag) {
+            var size = sizes[Math.floor(Math.random() * sizes.length)];
+            return '<a href="/?tag=' + encodeURIComponent(tag) + '" style="font-size:' + size + 'em;padding:3px 10px;background:#e6f5f0;color:#3a7a6a;border:1px solid #b8ddd0;border-radius:4px;text-decoration:none;white-space:nowrap">' + tag + '</a>';
+          }).join('');
+        } else {
+          tagCloudEl.innerHTML = '<span style="color:#9f927d;font-size:0.85em">暂无标签</span>';
+        }
+      });
+    }
+
     // 加载文章列表（支持分页）
     var currentPage = parseInt(new URLSearchParams(window.location.search).get('page')) || 1;
     var currentCategory = new URLSearchParams(window.location.search).get('category');
+    var currentTag = new URLSearchParams(window.location.search).get('tag');
 
     function loadPosts(page) {
       page = page || 1;
@@ -197,6 +238,15 @@ export function getFrontendHTML(settings) {
             var el = document.getElementById('current-cat');
             if(el && cat) el.textContent = '当前分类：' + cat.name;
           });
+        }
+
+        if (currentTag) {
+          // 标签筛选：前端过滤
+          posts = posts.filter(function(post) {
+            if (post.password) return false;
+            return post.tags && post.tags.split(',').map(function(t){return t.trim()}).indexOf(currentTag) >= 0;
+          });
+          html += '<div style="margin-bottom:16px"><a href="/" style="display:inline-block;padding:8px 20px;background:#19c8b9;color:#fff;text-decoration:none;border-radius:50px;font-weight:600;font-size:0.9em;box-shadow:0 4px 0 0 #11a89b">← 返回首页</a> <span style="color:#794f27;font-weight:600;margin-left:8px">标签：' + currentTag + '</span></div>';
         }
 
         if (!posts || posts.length === 0) {

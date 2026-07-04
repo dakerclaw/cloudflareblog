@@ -294,17 +294,17 @@ async function handlePostPage(request, env, path, ctx) {
 
   // 如果带密码参数，不缓存
   if (providedPassword) {
-    return renderPostPage(env, id, providedPassword);
+    return renderPostPage(request, env, id, providedPassword);
   }
 
   // 文章详情页不缓存（编辑后立即生效）
-  return renderPostPage(env, id, null);
+  return renderPostPage(request, env, id, null);
 }
 
 /**
  * 渲染文章详情页
  */
-async function renderPostPage(env, id, providedPassword) {
+async function renderPostPage(request, env, id, providedPassword) {
   const settings = await getSettings(env);
 
   const post = await env.DB.prepare(

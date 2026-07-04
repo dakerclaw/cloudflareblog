@@ -119,7 +119,13 @@ export async function initDB(env) {
       ['site_links', ''],
       ['site_footer', '© 2026 我的博客'],
       ['custom_js', ''],
-      ['site_author', '']
+      ['site_author', ''],
+      ['category_icon', '📂'],
+      ['links_icon', '🔗'],
+      ['tag_cloud_icon', '🏷️'],
+      ['enable_tag_cloud', '1'],
+      ['profile_position', 'left'],
+      ['tag_cloud_position', 'left']
     ];
 
     // 逐条插入默认设置（避免 D1 batch 10条限制）
@@ -172,7 +178,13 @@ export async function getSettings(env) {
     site_author: '',
     site_footer: '',
     custom_js: '',
-    site_links: ''
+    site_links: '',
+    category_icon: '📂',
+    links_icon: '🔗',
+    tag_cloud_icon: '🏷️',
+    enable_tag_cloud: '1',
+    profile_position: 'left',
+    tag_cloud_position: 'left'
   };
 
   try {

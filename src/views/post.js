@@ -120,7 +120,7 @@ export function getPostHTML(post, settings) {
     ${siteDesc ? `<p>${escapeHtml(siteDesc)}</p>` : ''}
   </header>
   <main>
-    <aside class="sidebar">
+    <aside class="sidebar" ${settings.profile_position === 'right' ? 'style="order:2"' : ''}>
       <div class="profile-card">
         ${siteAvatar ? `<img class="avatar" src="${escapeHtml(siteAvatar)}" alt="${escapeHtml(siteAuthor)}">` : `<img class="avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect fill='%23e8e0cc' width='80' height='80'/%3E%3Ctext x='40' y='45' text-anchor='middle' fill='%239f927d' font-size='32'%3E?%3C/text%3E%3C/svg%3E" alt="头像">`}
         <div class="name">${escapeHtml(siteAuthor)}</div>
@@ -134,13 +134,23 @@ export function getPostHTML(post, settings) {
           <div>建站时间：${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}</div>
           <div>最后更新：<span id="site-updated">-</span></div>
         </div>
-        <h4>📂 分类</h4>
+        <h4>${settings.category_icon ? (settings.category_icon.startsWith('http') || settings.category_icon.startsWith('/images/') ? '<img src="' + escapeHtml(settings.category_icon) + '" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">' : settings.category_icon + ' ') : '📂 '}分类</h4>
         <div id="category-list" class="category-list"></div>
-        <h4>🔗 ${escapeHtml(settings.links_title || '友链')}</h4>
+        <h4>${settings.links_icon ? (settings.links_icon.startsWith('http') || settings.links_icon.startsWith('/images/') ? '<img src="' + escapeHtml(settings.links_icon) + '" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">' : settings.links_icon + ' ') : '🔗 '}${escapeHtml(settings.links_title || '友链')}</h4>
         <div id="link-list" class="link-list"></div>
+        ${settings.enable_tag_cloud !== '0' && settings.tag_cloud_position === 'left' ? `
+        <h4>${settings.tag_cloud_icon ? (settings.tag_cloud_icon.startsWith('http') || settings.tag_cloud_icon.startsWith('/images/') ? '<img src="' + escapeHtml(settings.tag_cloud_icon) + '" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">' : settings.tag_cloud_icon + ' ') : '🏷️ '}标签云</h4>
+        <div id="tag-cloud" class="tag-cloud" style="display:flex;flex-wrap:wrap;gap:6px;padding:8px 0"></div>
+        ` : ''}
       </div>
     </aside>
-    <div class="content-area">
+    <div class="content-area" ${settings.profile_position === 'right' ? 'style="order:1"' : ''}>
+      ${settings.enable_tag_cloud !== '0' && settings.tag_cloud_position === 'right' ? `
+      <div style="margin-bottom:16px;padding:16px;background:#f7f3df;border-radius:20px;border:2px solid #e8e0cc">
+        <h4 style="margin-bottom:10px">${settings.tag_cloud_icon ? (settings.tag_cloud_icon.startsWith('http') || settings.tag_cloud_icon.startsWith('/images/') ? '<img src="' + escapeHtml(settings.tag_cloud_icon) + '" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">' : settings.tag_cloud_icon + ' ') : '🏷️ '}标签云</h4>
+        <div id="tag-cloud" class="tag-cloud" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      ` : ''}
       <a class="back-link" href="/">← 返回首页</a>
       <article class="post-article">
         <h1>${escapeHtml(post.title)}</h1>
@@ -181,6 +191,36 @@ export function getPostHTML(post, settings) {
       var list = document.getElementById('link-list');
       if(links && links.length > 0) list.innerHTML = links.map(function(l){return '<a href="'+l.url+'" target="_blank" rel="noopener">'+l.name+'</a>'}).join('');
     });
+
+    // 加载标签云
+    var tagCloudEl = document.getElementById('tag-cloud');
+    if (tagCloudEl) {
+      fetch('/api/posts?limit=999').then(function(r){return r.json()}).then(function(res) {
+        var posts = res.data || [];
+        var tagMap = {};
+        posts.forEach(function(post) {
+          if (post.password) return; // 跳过有密码的文章
+          if (post.tags) {
+            post.tags.split(',').forEach(function(t) {
+              var tag = t.trim();
+              if (tag) {
+                tagMap[tag] = (tagMap[tag] || 0) + 1;
+              }
+            });
+          }
+        });
+        var tags = Object.keys(tagMap);
+        if (tags.length > 0) {
+          var sizes = [0.75, 0.85, 1, 1.15, 1.3];
+          tagCloudEl.innerHTML = tags.map(function(tag) {
+            var size = sizes[Math.floor(Math.random() * sizes.length)];
+            return '<a href="/?tag=' + encodeURIComponent(tag) + '" style="font-size:' + size + 'em;padding:3px 10px;background:#e6f5f0;color:#3a7a6a;border:1px solid #b8ddd0;border-radius:4px;text-decoration:none;white-space:nowrap">' + tag + '</a>';
+          }).join('');
+        } else {
+          tagCloudEl.innerHTML = '<span style="color:#9f927d;font-size:0.85em">暂无标签</span>';
+        }
+      });
+    }
 
     window.addEventListener('scroll', function() {
       var btn = document.querySelector('.back-to-top');

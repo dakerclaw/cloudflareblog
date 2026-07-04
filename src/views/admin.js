@@ -533,6 +533,80 @@ export function getAdminHTML() {
               <div class="form-group"><label>个人简介</label><textarea v-model="settingsForm.site_bio" rows="3"></textarea></div>
               <div class="form-group"><label>建站时间</label><input type="date" v-model="settingsForm.site_created_at"></div>
               <div class="form-group"><label>友链标题</label><input v-model="settingsForm.links_title" placeholder="友链"></div>
+              <div class="form-group">
+                <label>分类标题图标</label>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <input v-model="settingsForm.category_icon" placeholder="输入emoji或图片地址" style="flex:1">
+                  <div @click="$refs.categoryIconInput.click()" style="width:36px;height:36px;border:2px dashed #c4b89e;border-radius:8px;background:#f0e8d8;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;overflow:hidden">
+                    <input ref="categoryIconInput" type="file" @change="handleCategoryIcon" accept="image/*" style="display:none">
+                    <img v-if="settingsForm.category_icon && settingsForm.category_icon.startsWith('http')" :src="settingsForm.category_icon" style="width:32px;height:32px;object-fit:cover">
+                    <span v-else-if="settingsForm.category_icon" style="font-size:20px">{{settingsForm.category_icon}}</span>
+                    <span v-else style="color:#9f927d;font-size:12px">上传</span>
+                  </div>
+                  <button v-if="settingsForm.category_icon" @click="settingsForm.category_icon=''" style="padding:4px 8px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:12px;font-weight:600;box-shadow:0 2px 0 0 #c94444">清除</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>友链标题图标</label>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <input v-model="settingsForm.links_icon" placeholder="输入emoji或图片地址" style="flex:1">
+                  <div @click="$refs.linksIconInput.click()" style="width:36px;height:36px;border:2px dashed #c4b89e;border-radius:8px;background:#f0e8d8;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;overflow:hidden">
+                    <input ref="linksIconInput" type="file" @change="handleLinksIcon" accept="image/*" style="display:none">
+                    <img v-if="settingsForm.links_icon && settingsForm.links_icon.startsWith('http')" :src="settingsForm.links_icon" style="width:32px;height:32px;object-fit:cover">
+                    <span v-else-if="settingsForm.links_icon" style="font-size:20px">{{settingsForm.links_icon}}</span>
+                    <span v-else style="color:#9f927d;font-size:12px">上传</span>
+                  </div>
+                  <button v-if="settingsForm.links_icon" @click="settingsForm.links_icon=''" style="padding:4px 8px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:12px;font-weight:600;box-shadow:0 2px 0 0 #c94444">清除</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>标签云图标</label>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <input v-model="settingsForm.tag_cloud_icon" placeholder="输入emoji或图片地址" style="flex:1">
+                  <div @click="$refs.tagCloudIconInput.click()" style="width:36px;height:36px;border:2px dashed #c4b89e;border-radius:8px;background:#f0e8d8;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;overflow:hidden">
+                    <input ref="tagCloudIconInput" type="file" @change="handleTagCloudIcon" accept="image/*" style="display:none">
+                    <img v-if="settingsForm.tag_cloud_icon && settingsForm.tag_cloud_icon.startsWith('http')" :src="settingsForm.tag_cloud_icon" style="width:32px;height:32px;object-fit:cover">
+                    <span v-else-if="settingsForm.tag_cloud_icon" style="font-size:20px">{{settingsForm.tag_cloud_icon}}</span>
+                    <span v-else style="color:#9f927d;font-size:12px">上传</span>
+                  </div>
+                  <button v-if="settingsForm.tag_cloud_icon" @click="settingsForm.tag_cloud_icon=''" style="padding:4px 8px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:12px;font-weight:600;box-shadow:0 2px 0 0 #c94444">清除</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>标签云开关</label>
+                <div style="display:flex;gap:20px;margin-top:8px">
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#725d42">
+                    <input type="checkbox" :true-value="'1'" :false-value="'0'" v-model="settingsForm.enable_tag_cloud" style="width:18px;height:18px;cursor:pointer">
+                    显示标签云模块
+                  </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>个人简介位置</label>
+                <div style="display:flex;gap:20px;margin-top:8px">
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#725d42">
+                    <input type="radio" value="left" v-model="settingsForm.profile_position" style="width:16px;height:16px;cursor:pointer">
+                    居左
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#725d42">
+                    <input type="radio" value="right" v-model="settingsForm.profile_position" style="width:16px;height:16px;cursor:pointer">
+                    居右
+                  </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>标签云位置</label>
+                <div style="display:flex;gap:20px;margin-top:8px">
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#725d42">
+                    <input type="radio" value="left" v-model="settingsForm.tag_cloud_position" style="width:16px;height:16px;cursor:pointer">
+                    居左
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#725d42">
+                    <input type="radio" value="right" v-model="settingsForm.tag_cloud_position" style="width:16px;height:16px;cursor:pointer">
+                    居右
+                  </label>
+                </div>
+              </div>
               <div class="form-group"><label>友链内容（名称,地址 每行一个）</label><textarea v-model="settingsForm.site_links" rows="4"></textarea></div>
               <button class="btn" @click="saveSettings" style="width:100%;margin-top:16px">保存设置</button>
             </div>
@@ -542,10 +616,14 @@ export function getAdminHTML() {
       <div v-if="confirmModal.show" class="modal" @click.self="confirmModal.show=false">
         <div class="modal-box">
           <h3 style="color:#794f27;margin-bottom:12px">{{confirmModal.title}}</h3>
-          <p style="margin-bottom:24px">{{confirmModal.message}}</p>
+          <p style="margin-bottom:16px">{{confirmModal.message}}</p>
+          <div v-if="confirmModal.checkbox" style="margin-bottom:20px;display:flex;align-items:center;gap:8px;justify-content:center">
+            <input type="checkbox" id="confirmCheckbox" v-model="confirmModal.checkboxValue" style="width:16px;height:16px;cursor:pointer">
+            <label for="confirmCheckbox" style="cursor:pointer;color:#725d42;font-size:14px">{{confirmModal.checkboxLabel}}</label>
+          </div>
           <div style="display:flex;gap:12px;justify-content:center">
             <button class="btn btn-cancel" @click="confirmModal.show=false">取消</button>
-            <button class="btn" @click="confirmModal.onConfirm()">确认</button>
+            <button class="btn" @click="confirmModal.onConfirm(confirmModal.checkboxValue)">确认</button>
           </div>
         </div>
       </div>
@@ -566,7 +644,7 @@ export function getAdminHTML() {
         const toast = ref('');
         const categories = ref([]);
         const currentPage = ref('posts');
-        const settingsForm = ref({ site_name: '', site_description: '', site_favicon: '', site_avatar: '', site_bio: '', site_links: '', site_author: '', site_footer: '', custom_js: '', site_theme: 'animal-forest' });
+        const settingsForm = ref({ site_name: '', site_description: '', site_favicon: '', site_avatar: '', site_bio: '', site_links: '', site_author: '', site_footer: '', custom_js: '', site_theme: 'animal-forest', category_icon: '📂', links_icon: '🔗', tag_cloud_icon: '🏷️', enable_tag_cloud: '1', profile_position: 'left', tag_cloud_position: 'left' });
         const categoryForm = ref({ name: '', slug: '', description: '' });
         const editingCategory = ref(null);
         const trashPosts = ref([]);
@@ -587,33 +665,69 @@ export function getAdminHTML() {
         const logout = () => { localStorage.removeItem('token'); logged.value = false; };
         const loadPosts = async () => { try { const r = await api('/api/admin/posts'); posts.value = r.data; } catch (e) { showToast('加载文章失败'); } };
         const loadCategories = async () => { try { const r = await api('/api/categories'); categories.value = r.data; } catch (e) { showToast('加载分类失败'); } };
-        const loadSettings = async () => { try { const r = await api('/api/settings'); settingsForm.value = { site_name: r.data.site_name || '', site_description: r.data.site_description || '', site_favicon: r.data.site_favicon || '', site_avatar: r.data.site_avatar || '', site_bio: r.data.site_bio || '', site_links: r.data.site_links || '', site_author: r.data.site_author || '', site_footer: r.data.site_footer || '', custom_js: r.data.custom_js || '', site_theme: r.data.site_theme || 'animal-forest', allow_robots: r.data.allow_robots || '1', enable_compression: r.data.enable_compression || '1', links_title: r.data.links_title || '友链', site_created_at: r.data.site_created_at || '2020-02-02', site_password: r.data.site_password || '', allowed_origins: r.data.allowed_origins || '*' }; applyTheme(); } catch (e) { showToast('加载设置失败'); } };
+        const loadSettings = async () => { try { const r = await api('/api/settings'); settingsForm.value = { site_name: r.data.site_name || '', site_description: r.data.site_description || '', site_favicon: r.data.site_favicon || '', site_avatar: r.data.site_avatar || '', site_bio: r.data.site_bio || '', site_links: r.data.site_links || '', site_author: r.data.site_author || '', site_footer: r.data.site_footer || '', custom_js: r.data.custom_js || '', site_theme: r.data.site_theme || 'animal-forest', allow_robots: r.data.allow_robots || '1', enable_compression: r.data.enable_compression || '1', links_title: r.data.links_title || '友链', site_created_at: r.data.site_created_at || '2020-02-02', site_password: r.data.site_password || '', allowed_origins: r.data.allowed_origins || '*', category_icon: r.data.category_icon || '📂', links_icon: r.data.links_icon || '🔗', tag_cloud_icon: r.data.tag_cloud_icon || '🏷️', enable_tag_cloud: r.data.enable_tag_cloud || '1', profile_position: r.data.profile_position || 'left', tag_cloud_position: r.data.tag_cloud_position || 'left' }; applyTheme(); } catch (e) { showToast('加载设置失败'); } };
         const loadTrash = async () => { try { const r = await api('/api/admin/trash'); trashPosts.value = r.data; } catch (e) { showToast('加载回收站失败'); } };
         const showToast = (m) => { toast.value = m; setTimeout(() => toast.value = '', 2000); };
-        const showConfirm = (t, m) => new Promise(r => { confirmModal.value = { show: true, title: t, message: m, onConfirm: () => { confirmModal.value.show = false; r(true); } }; });
+        const showConfirm = (t, m, options = {}) => new Promise(r => {
+          confirmModal.value = {
+            show: true,
+            title: t,
+            message: m,
+            checkbox: options.checkbox || false,
+            checkboxLabel: options.checkboxLabel || '',
+            checkboxValue: options.checkboxDefault !== undefined ? options.checkboxDefault : true,
+            onConfirm: (checkboxVal) => { confirmModal.value.show = false; r({ confirmed: true, checkboxValue: checkboxVal }); }
+          };
+        });
         const postPage = ref(1);
         const postPageSize = 10;
         const openAdd = () => { if (editingId.value) { editingId.value = null; } editingId.value = 'new'; form.value = { title: '', content: '', category: '', tags: '', status: 'draft', cover_image: '', password: '', published_at: new Date().toISOString().split('T')[0] }; coverPreview.value = ''; };
-        const cancelNewPost = async () => { const c = await showConfirm('确认取消', '未保存的内容将丢失'); if (c) { editingId.value = null; } };
+        const cancelNewPost = async () => { const { confirmed } = await showConfirm('确认取消', '未保存的内容将丢失'); if (confirmed) { editingId.value = null; } };
         const toggleEdit = (p) => { if (editingId.value === p.id) { editingId.value = null; } else { editingId.value = p.id; form.value = { title: p.title, content: p.content, category: p.category, tags: p.tags, status: p.status, cover_image: p.cover_image || '', password: p.password || '', published_at: p.published_at ? p.published_at.split('T')[0] : new Date().toISOString().split('T')[0] }; coverPreview.value = p.cover_image || ''; } };
-        const savePost = async () => { const c = await showConfirm('确认保存', '确定保存？'); if (!c) return; try { if (editingId.value === 'new') { await api('/api/admin/post', { method: 'POST', data: form.value }); } else { await api('/api/admin/post?id=' + editingId.value, { method: 'PUT', data: form.value }); } editingId.value = null; loadPosts(); showToast('保存成功'); } catch (e) { alert('保存失败'); } };
-        const deletePost = async (id) => { const c = await showConfirm('确认删除', '移到回收站？'); if (!c) return; try { await api('/api/admin/post?id=' + id, { method: 'DELETE' }); loadPosts(); loadTrash(); showToast('已移到回收站'); } catch (e) { showToast('删除失败'); } };
+        const savePost = async () => { const { confirmed } = await showConfirm('确认保存', '确定保存？'); if (!confirmed) return; try { if (editingId.value === 'new') { await api('/api/admin/post', { method: 'POST', data: form.value }); } else { await api('/api/admin/post?id=' + editingId.value, { method: 'PUT', data: form.value }); } editingId.value = null; loadPosts(); showToast('保存成功'); } catch (e) { alert('保存失败'); } };
+        const deletePost = async (id) => { const { confirmed } = await showConfirm('确认删除', '移到回收站？'); if (!confirmed) return; try { await api('/api/admin/post?id=' + id, { method: 'DELETE' }); loadPosts(); loadTrash(); showToast('已移到回收站'); } catch (e) { showToast('删除失败'); } };
         const editCategory = (c) => { editingCategory.value = c.id; categoryForm.value = { name: c.name, slug: c.slug, description: c.description || '' }; };
-        const saveCategory = async () => { if (!categoryForm.value.name || !categoryForm.value.slug) { alert('请填写'); return; } const c = await showConfirm('确认保存', '确定？'); if (!c) return; try { const d = { ...categoryForm.value }; if (editingCategory.value && editingCategory.value !== 'new') d.id = editingCategory.value; await api('/api/category', { method: 'POST', data: d }); loadCategories(); editingCategory.value = null; categoryForm.value = { name: '', slug: '', description: '' }; showToast('保存成功'); } catch (e) { alert('保存失败'); } };
-        const deleteCategory = async (id) => { const c = await showConfirm('确认删除', '确定？'); if (!c) return; try { await api('/api/category?id=' + id, { method: 'DELETE' }); loadCategories(); showToast('已删除'); } catch (e) { showToast('删除分类失败'); } };
+        const saveCategory = async () => { if (!categoryForm.value.name || !categoryForm.value.slug) { alert('请填写'); return; } const { confirmed } = await showConfirm('确认保存', '确定？'); if (!confirmed) return; try { const d = { ...categoryForm.value }; if (editingCategory.value && editingCategory.value !== 'new') d.id = editingCategory.value; await api('/api/category', { method: 'POST', data: d }); loadCategories(); editingCategory.value = null; categoryForm.value = { name: '', slug: '', description: '' }; showToast('保存成功'); } catch (e) { alert('保存失败'); } };
+        const deleteCategory = async (id) => { const { confirmed } = await showConfirm('确认删除', '确定？'); if (!confirmed) return; try { await api('/api/category?id=' + id, { method: 'DELETE' }); loadCategories(); showToast('已删除'); } catch (e) { showToast('删除分类失败'); } };
         const saveSettings = async () => { try { const r = await api('/api/settings', { method: 'POST', data: settingsForm.value }); if (r.data && r.data.success) { showToast('保存成功'); } else { alert('保存失败: ' + (r.data ? r.data.error : '未知错误')); } } catch (e) { console.error('保存设置错误:', e); alert('保存失败: ' + (e.response ? e.response.data.error || e.response.statusText : e.message)); } };
         const handleCoverChange = async (e) => { const f = e.target.files[0]; if (f) await uploadFile(f); };
         const handleCoverDrop = async (e) => { const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) await uploadFile(f); };
         const handleDrop = async (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) await uploadFile(f); };
         const uploadFile = async (f) => { if (f.size > 2097152) { alert('文件大小不能超过 2MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) { form.value.cover_image = d.url; coverPreview.value = d.url; } };
         const handleAvatarDrop = async (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) { const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.site_avatar = d.url; } };
-        const deleteCover = () => { form.value.cover_image = ''; coverPreview.value = ''; };
+        const deleteCover = async () => {
+          const imageUrl = form.value.cover_image;
+          if (!imageUrl) return;
+          
+          const { confirmed, checkboxValue } = await showConfirm(
+            '删除封面图片',
+            '确定要删除封面图片吗？',
+            { checkbox: true, checkboxLabel: '同时删除存储桶中的图片资源', checkboxDefault: true }
+          );
+          
+          if (!confirmed) return;
+          
+          if (checkboxValue && imageUrl.startsWith('/images/')) {
+            try {
+              await api('/api/delete-image', { method: 'POST', data: { url: imageUrl } });
+              showToast('图片已从存储桶删除');
+            } catch (e) {
+              showToast('删除存储桶图片失败');
+            }
+          }
+          
+          form.value.cover_image = '';
+          coverPreview.value = '';
+        };
         const handleFavicon = async (e) => { const f = e.target.files[0]; if (f) await uploadFavicon(f); };
         const handleFaviconDrop = async (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) await uploadFavicon(f); };
         const uploadFavicon = async (f) => { if (f.size > 2097152) { alert('文件大小不能超过 2MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.site_favicon = d.url; };
         const handleAvatar = async (e) => { const f = e.target.files[0]; if (!f) return; if (f.size > 2097152) { alert('文件大小不能超过 2MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.site_avatar = d.url; };
-        const restorePost = async (id) => { const c = await showConfirm('确认恢复', '将文章恢复为草稿？'); if (!c) return; try { await api('/api/admin/restore', { method: 'POST', data: { id } }); loadPosts(); loadTrash(); showToast('已恢复'); } catch (e) { showToast('恢复失败'); } };
-        const permanentDelete = async (id) => { const c = await showConfirm('确认删除', '彻底删除？不可恢复！'); if (!c) return; try { await api('/api/admin/permanent-delete', { method: 'POST', data: { id } }); loadTrash(); showToast('已删除'); } catch (e) { showToast('删除失败'); } };
+        const handleCategoryIcon = async (e) => { const f = e.target.files[0]; if (!f) return; if (f.size > 2097152) { alert('文件大小不能超过 2MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.category_icon = d.url; };
+        const handleLinksIcon = async (e) => { const f = e.target.files[0]; if (!f) return; if (f.size > 2097152) { alert('文件大小不能超过 2MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.links_icon = d.url; };
+        const handleTagCloudIcon = async (e) => { const f = e.target.files[0]; if (!f) return; if (f.size > 2097152) { alert('文件大小不能超过 2MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.tag_cloud_icon = d.url; };
+        const restorePost = async (id) => { const { confirmed } = await showConfirm('确认恢复', '将文章恢复为草稿？'); if (!confirmed) return; try { await api('/api/admin/restore', { method: 'POST', data: { id } }); loadPosts(); loadTrash(); showToast('已恢复'); } catch (e) { showToast('恢复失败'); } };
+        const permanentDelete = async (id) => { const { confirmed } = await showConfirm('确认删除', '彻底删除？不可恢复！'); if (!confirmed) return; try { await api('/api/admin/permanent-delete', { method: 'POST', data: { id } }); loadTrash(); showToast('已删除'); } catch (e) { showToast('删除失败'); } };
 
         
         const insertMd = (type) => {
@@ -728,7 +842,7 @@ export function getAdminHTML() {
 
         watch(currentPage, (v) => { localStorage.setItem('adminPage', v); });
         onMounted(() => { check(); document.addEventListener('click', closeAllSelects); });
-        return { logged, username, password, login, logout, posts, editingId, form, coverPreview, toast, openAdd, cancelNewPost, toggleEdit, handleCoverChange, handleCoverDrop, handleDrop, deleteCover, savePost, deletePost, categories, currentPage, postPage, postPageSize, categoryForm, saveCategory, deleteCategory, editCategory, editingCategory, settingsForm, saveSettings, handleFavicon, handleFaviconDrop, handleAvatar, handleAvatarDrop, trashPosts, restorePost, permanentDelete, confirmModal, showConfirm, insertMd, applyTheme, customSelects, toggleSelect, selectOption, getSelectLabel };
+        return { logged, username, password, login, logout, posts, editingId, form, coverPreview, toast, openAdd, cancelNewPost, toggleEdit, handleCoverChange, handleCoverDrop, handleDrop, deleteCover, savePost, deletePost, categories, currentPage, postPage, postPageSize, categoryForm, saveCategory, deleteCategory, editCategory, editingCategory, settingsForm, saveSettings, handleFavicon, handleFaviconDrop, handleAvatar, handleAvatarDrop, handleCategoryIcon, handleLinksIcon, handleTagCloudIcon, trashPosts, restorePost, permanentDelete, confirmModal, showConfirm, insertMd, applyTheme, customSelects, toggleSelect, selectOption, getSelectLabel };
       }
     }).mount('#app');
   <\/script>

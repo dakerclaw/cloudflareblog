@@ -263,6 +263,11 @@ export async function handleAPI(request, env, path) {
       return handleSaveSettings(request, env);
     }
 
+    // 删除图片
+    if (path === '/api/delete-image' && method === 'POST') {
+      return handleDeleteImage(request, env);
+    }
+
     return errorResponse('未找到接口', 404);
   } catch (e) {
     return errorResponse('服务器错误', 500, e);
@@ -597,5 +602,27 @@ async function handleSaveSettings(request, env) {
   } catch (e) {
     console.error('[API] 保存设置失败:', e);
     return json({ success: false, error: '保存设置失败: ' + e.message }, 500);
+  }
+}
+
+async function handleDeleteImage(request, env) {
+  try {
+    const body = await request.json();
+    const { url } = body;
+    
+    if (!url || !url.startsWith('/images/')) {
+      return json({ success: false, error: '无效的图片地址' }, 400);
+    }
+    
+    if (!env.R2) {
+      return json({ success: true, message: '未配置存储桶，仅清除引用' });
+    }
+    
+    const filename = url.replace('/images/', '');
+    await env.R2.delete(filename);
+    return json({ success: true, message: '图片已从存储桶删除' });
+  } catch (e) {
+    console.error('[API] 删除图片失败:', e);
+    return json({ success: false, error: '删除图片失败: ' + e.message }, 500);
   }
 }
