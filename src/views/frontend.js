@@ -215,7 +215,10 @@ export function getFrontendHTML(settings) {
             { bg: '#fef3e2', color: '#c77c00', border: '#ffa726' },
             { bg: '#fce4ec', color: '#c62828', border: '#ef5350' },
             { bg: '#e8eaf6', color: '#283593', border: '#5c6bc0' },
-            { bg: '#f3e5f5', color: '#6a1b9a', border: '#ab47bc' }
+            { bg: '#f3e5f5', color: '#6a1b9a', border: '#ab47bc' },
+            { bg: '#e0f2f1', color: '#00695c', border: '#26a69a' },
+            { bg: '#fff8e1', color: '#f57f17', border: '#fbc02d' },
+            { bg: '#efebe9', color: '#4e342e', border: '#795548' }
           ];
           tagCloudEl.innerHTML = tags.map(function(tag) {
             var c = colors[Math.floor(Math.random() * colors.length)];
