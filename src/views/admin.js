@@ -489,7 +489,7 @@ export function getAdminHTML() {
           <button class="btn" @click="saveSettings" style="margin-bottom:16px">保存设置</button>
           <div style="display:flex;gap:20px;flex-wrap:wrap">
             <!-- 第一栏：网站设置 -->
-            <div style="flex:1;min-width:300px">
+            <div style="flex:0 0 33.33%;max-width:33.33%;min-width:300px">
               <div class="card">
                 <h3 style="color:#794f27;font-size:18px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #e8e0cc">基本设置</h3>
                 <div class="form-group"><label>网站标题</label><input v-model="settingsForm.site_name"></div>
@@ -528,7 +528,7 @@ export function getAdminHTML() {
               </div>
             </div>
             <!-- 第二栏：安全与优化 -->
-            <div style="flex:1;min-width:300px">
+            <div style="flex:0 0 33.33%;max-width:33.33%;min-width:300px">
               <div class="card">
                 <h3 style="color:#794f27;font-size:18px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #e8e0cc">安全与优化</h3>
                 <div class="form-group"><label>全站密码（留空则不启用）</label><input v-model="settingsForm.site_password" type="password" placeholder="留空则公开访问"></div>
@@ -572,7 +572,7 @@ export function getAdminHTML() {
           <button class="btn" @click="saveSettings" style="margin-bottom:16px">保存设置</button>
           <div style="display:flex;gap:20px;flex-wrap:wrap">
             <!-- 第一栏：个人设置 -->
-            <div style="flex:1;min-width:300px">
+            <div style="flex:0 0 33.33%;max-width:33.33%;min-width:300px">
               <div class="card">
                 <h3 style="color:#794f27;font-size:18px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #e8e0cc">个人信息</h3>
                 <div class="form-group"><label>个人名称</label><input v-model="settingsForm.site_author"></div>
@@ -602,7 +602,7 @@ export function getAdminHTML() {
               </div>
             </div>
             <!-- 第二栏：其他设置 -->
-            <div style="flex:1;min-width:300px">
+            <div style="flex:0 0 33.33%;max-width:33.33%;min-width:300px">
               <div class="card">
                 <h3 style="color:#794f27;font-size:18px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #e8e0cc">模块与图标</h3>
                 <div class="form-group">
