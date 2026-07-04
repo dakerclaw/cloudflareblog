@@ -273,7 +273,7 @@ export function getAdminHTML() {
       <div class="main-content" role="main" aria-label="主要内容">
         <div v-if="currentPage==='posts'">
           <!-- 文章列表 -->
-          <div v-show="!editingId">
+          <div v-if="!editingId">
           <div class="page-header"><h2>文章管理</h2></div>
           <button class="btn" @click="openAdd()" style="margin-bottom:16px">新建文章</button>
           <div class="w-60"><div class="card" style="padding:0;overflow:hidden">
@@ -312,9 +312,10 @@ export function getAdminHTML() {
             <button class="btn btn-cancel" @click="postPage=Math.min(Math.ceil(posts.length/postPageSize),postPage+1)" :style="{opacity:postPage>=Math.ceil(posts.length/postPageSize)?0.4:1}" :disabled="postPage>=Math.ceil(posts.length/postPageSize)" style="padding:8px 16px;font-size:14px">下一页</button>
           </div>
           </div>
+          </div>
 
           <!-- 编辑/新建文章 -->
-          <div v-show="editingId" class="card" style="margin-top:20px">
+          <div v-if="editingId" class="card" style="margin-top:20px">
             <div class="page-header" style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
               <button class="btn btn-cancel" @click="cancelNewPost" style="padding:8px 16px;font-size:14px">← 返回</button>
               <h2>{{editingId === 'new' ? '新建文章' : '编辑文章'}}</h2>
@@ -702,7 +703,7 @@ export function getAdminHTML() {
         });
         const postPage = ref(1);
         const postPageSize = 10;
-        const openAdd = () => { if (editingId.value) { editingId.value = null; } editingId.value = 'new'; form.value = { title: '', content: '', category: '', tags: '', status: 'draft', cover_image: '', password: '', published_at: new Date().toISOString().split('T')[0] }; coverPreview.value = ''; };
+        const openAdd = () => { editingId.value = 'new'; form.value = { title: '', content: '', category: '', tags: '', status: 'draft', cover_image: '', password: '', published_at: new Date().toISOString().split('T')[0] }; coverPreview.value = ''; };
         const cancelNewPost = async () => { const { confirmed } = await showConfirm('确认取消', '未保存的内容将丢失'); if (confirmed) { editingId.value = null; } };
         const toggleEdit = (p) => { if (editingId.value === p.id) { editingId.value = null; } else { editingId.value = p.id; form.value = { title: p.title, content: p.content, category: p.category, tags: p.tags, status: p.status, cover_image: p.cover_image || '', password: p.password || '', published_at: p.published_at ? p.published_at.split('T')[0] : new Date().toISOString().split('T')[0] }; coverPreview.value = p.cover_image || ''; } };
         const savePost = async () => { const { confirmed } = await showConfirm('确认保存', '确定保存？'); if (!confirmed) return; try { if (editingId.value === 'new') { await api('/api/admin/post', { method: 'POST', data: form.value }); } else { await api('/api/admin/post?id=' + editingId.value, { method: 'PUT', data: form.value }); } editingId.value = null; loadPosts(); showToast('保存成功'); } catch (e) { alert('保存失败'); } };
