@@ -529,13 +529,13 @@ export function getAdminHTML() {
                 <div class="form-group"><label>置顶文章编号（留空则不置顶）</label><input v-model="settingsForm.pinned_post_id" type="number" min="0" step="1" placeholder="输入单个文章ID" @input="settingsForm.pinned_post_id = settingsForm.pinned_post_id.replace(/[^0-9]/g, '')"></div>
                 <div class="form-group">
                   <label>主题风格</label>
-                  <div class="radio-group">
-                    <label class="radio-item">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <label class="radio-item" style="margin:0">
                       <input type="radio" value="animal-forest" v-model="settingsForm.site_theme" @change="applyTheme()">
                       <span class="radio-custom"></span>
                       <span class="radio-label">🌲 动物森林</span>
                     </label>
-                    <label class="radio-item">
+                    <label class="radio-item" style="margin:0">
                       <input type="radio" value="ocean-breeze" v-model="settingsForm.site_theme" @change="applyTheme()">
                       <span class="radio-custom"></span>
                       <span class="radio-label">🌊 海洋微风</span>
@@ -554,13 +554,13 @@ export function getAdminHTML() {
                 <div class="form-group"><label>CORS 允许来源（多域名用逗号分隔，* 表示全部）</label><input v-model="settingsForm.allowed_origins" placeholder="*"></div>
                 <div class="form-group">
                   <label>是否允许搜索引擎爬取</label>
-                  <div class="radio-group">
-                    <label class="radio-item">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <label class="radio-item" style="margin:0">
                       <input type="radio" value="1" v-model="settingsForm.allow_robots">
                       <span class="radio-custom"></span>
                       <span class="radio-label">是</span>
                     </label>
-                    <label class="radio-item">
+                    <label class="radio-item" style="margin:0">
                       <input type="radio" value="0" v-model="settingsForm.allow_robots">
                       <span class="radio-custom"></span>
                       <span class="radio-label">否</span>
@@ -569,13 +569,13 @@ export function getAdminHTML() {
                 </div>
                 <div class="form-group">
                   <label>是否启用压缩</label>
-                  <div class="radio-group">
-                    <label class="radio-item">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <label class="radio-item" style="margin:0">
                       <input type="radio" value="1" v-model="settingsForm.enable_compression">
                       <span class="radio-custom"></span>
                       <span class="radio-label">是</span>
                     </label>
-                    <label class="radio-item">
+                    <label class="radio-item" style="margin:0">
                       <input type="radio" value="0" v-model="settingsForm.enable_compression">
                       <span class="radio-custom"></span>
                       <span class="radio-label">否</span>
@@ -634,13 +634,13 @@ export function getAdminHTML() {
                 </div>
                 <div class="form-group">
                   <label>标签云开关</label>
-                  <div class="radio-group">
-                    <label class="radio-item">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <label class="radio-item" style="margin:0">
                       <input type="radio" value="1" v-model="settingsForm.enable_tag_cloud">
                       <span class="radio-custom"></span>
                       <span class="radio-label">显示</span>
                     </label>
-                    <label class="radio-item">
+                    <label class="radio-item" style="margin:0">
                       <input type="radio" value="0" v-model="settingsForm.enable_tag_cloud">
                       <span class="radio-custom"></span>
                       <span class="radio-label">不显示</span>
@@ -648,30 +648,30 @@ export function getAdminHTML() {
                   </div>
                 </div>
                 <div class="form-group">
-                  <label>个人简介位置</label>
-                  <div class="radio-group">
-                    <label class="radio-item">
-                      <input type="radio" value="left" v-model="settingsForm.profile_position">
+                  <label>标签云位置</label>
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <label class="radio-item" style="margin:0">
+                      <input type="radio" value="left" v-model="settingsForm.tag_cloud_position">
                       <span class="radio-custom"></span>
                       <span class="radio-label">居左</span>
                     </label>
-                    <label class="radio-item">
-                      <input type="radio" value="right" v-model="settingsForm.profile_position">
+                    <label class="radio-item" style="margin:0">
+                      <input type="radio" value="right" v-model="settingsForm.tag_cloud_position">
                       <span class="radio-custom"></span>
                       <span class="radio-label">居右</span>
                     </label>
                   </div>
                 </div>
                 <div class="form-group">
-                  <label>标签云位置</label>
-                  <div class="radio-group">
-                    <label class="radio-item">
-                      <input type="radio" value="left" v-model="settingsForm.tag_cloud_position">
+                  <label>个人简介位置</label>
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <label class="radio-item" style="margin:0">
+                      <input type="radio" value="left" v-model="settingsForm.profile_position">
                       <span class="radio-custom"></span>
                       <span class="radio-label">居左</span>
                     </label>
-                    <label class="radio-item">
-                      <input type="radio" value="right" v-model="settingsForm.tag_cloud_position">
+                    <label class="radio-item" style="margin:0">
+                      <input type="radio" value="right" v-model="settingsForm.profile_position">
                       <span class="radio-custom"></span>
                       <span class="radio-label">居右</span>
                     </label>
@@ -768,7 +768,7 @@ export function getAdminHTML() {
         const logout = () => { localStorage.removeItem('token'); logged.value = false; };
         const loadPosts = async () => { try { const r = await api('/api/admin/posts'); posts.value = r.data; } catch (e) { showToast('加载文章失败'); } };
         const loadCategories = async () => { try { const r = await api('/api/categories'); categories.value = r.data; } catch (e) { showToast('加载分类失败'); } };
-        const loadSettings = async () => { try { const r = await api('/api/settings'); settingsForm.value = { site_name: r.data.site_name || '', site_description: r.data.site_description || '', site_favicon: r.data.site_favicon || '', site_avatar: r.data.site_avatar || '', site_bio: r.data.site_bio || '', site_links: r.data.site_links || '', site_author: r.data.site_author || '', site_footer: r.data.site_footer || '', custom_js: r.data.custom_js || '', site_theme: r.data.site_theme || 'animal-forest', allow_robots: r.data.allow_robots || '1', enable_compression: r.data.enable_compression || '1', links_title: r.data.links_title || '友链', site_created_at: r.data.site_created_at || '2020-02-02', site_password: r.data.site_password || '', allowed_origins: r.data.allowed_origins || '*', category_icon: r.data.category_icon || '📂', links_icon: r.data.links_icon || '🔗', tag_cloud_icon: r.data.tag_cloud_icon || '🏷️', enable_tag_cloud: r.data.enable_tag_cloud || '1', profile_position: r.data.profile_position || 'left', tag_cloud_position: r.data.tag_cloud_position || 'left', pinned_post_id: r.data.pinned_post_id || '' }; currentPinnedId.value = r.data.pinned_post_id || ''; applyTheme(); } catch (e) { showToast('加载设置失败'); } };
+        const loadSettings = async () => { try { const r = await api('/api/settings'); settingsForm.value = { site_name: r.data.site_name || '', site_description: r.data.site_description || '', site_favicon: r.data.site_favicon || '', site_avatar: r.data.site_avatar || '', site_bio: r.data.site_bio || '', site_links: r.data.site_links || '', site_author: r.data.site_author || '', site_footer: r.data.site_footer || '', custom_js: r.data.custom_js || '', site_theme: r.data.site_theme || 'animal-forest', allow_robots: r.data.allow_robots || '1', enable_compression: r.data.enable_compression || '1', links_title: r.data.links_title || '友链', site_created_at: r.data.site_created_at || '2020-02-02', site_password: r.data.site_password || '', allowed_origins: r.data.allowed_origins || '*', category_icon: r.data.category_icon || '📂', links_icon: r.data.links_icon || '🔗', tag_cloud_icon: r.data.tag_cloud_icon || '🏷️', enable_tag_cloud: r.data.enable_tag_cloud || '1', profile_position: r.data.profile_position || 'left', tag_cloud_position: r.data.tag_cloud_position || 'left', pinned_post_id: r.data.pinned_post_id || '' }; currentPinnedId.value = r.data.pinned_post_id || ''; applyTheme(); updateFavicon(); } catch (e) { showToast('加载设置失败'); } };
         const loadTrash = async () => { try { const r = await api('/api/admin/trash'); trashPosts.value = r.data; } catch (e) { showToast('加载回收站失败'); } };
         const showToast = (m) => { toast.value = m; setTimeout(() => toast.value = '', 2000); };
         const showConfirm = (t, m, options = {}) => new Promise(r => {
@@ -793,7 +793,7 @@ export function getAdminHTML() {
         const editCategory = (c) => { editingCategory.value = c.id; categoryForm.value = { name: c.name, slug: c.slug, description: c.description || '' }; };
         const saveCategory = async () => { if (!categoryForm.value.name || !categoryForm.value.slug) { alert('请填写'); return; } const { confirmed } = await showConfirm('确认保存', '确定？'); if (!confirmed) return; try { const d = { ...categoryForm.value }; if (editingCategory.value && editingCategory.value !== 'new') d.id = editingCategory.value; await api('/api/category', { method: 'POST', data: d }); loadCategories(); editingCategory.value = null; categoryForm.value = { name: '', slug: '', description: '' }; showToast('保存成功'); } catch (e) { alert('保存失败'); } };
         const deleteCategory = async (id) => { const { confirmed } = await showConfirm('确认删除', '确定？'); if (!confirmed) return; try { await api('/api/category?id=' + id, { method: 'DELETE' }); loadCategories(); showToast('已删除'); } catch (e) { showToast('删除分类失败'); } };
-        const saveSettings = async () => { try { const r = await api('/api/settings', { method: 'POST', data: settingsForm.value }); if (r.data && r.data.success) { showToast('保存成功'); } else { alert('保存失败: ' + (r.data ? r.data.error : '未知错误')); } } catch (e) { console.error('保存设置错误:', e); alert('保存失败: ' + (e.response ? e.response.data.error || e.response.statusText : e.message)); } };
+        const saveSettings = async () => { try { const r = await api('/api/settings', { method: 'POST', data: settingsForm.value }); if (r.data && r.data.success) { showToast('保存成功'); updateFavicon(); } else { alert('保存失败: ' + (r.data ? r.data.error : '未知错误')); } } catch (e) { console.error('保存设置错误:', e); alert('保存失败: ' + (e.response ? e.response.data.error || e.response.statusText : e.message)); } };
         const handleCoverChange = async (e) => { const f = e.target.files[0]; if (f) await uploadFile(f); };
         const handleCoverDrop = async (e) => { const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) await uploadFile(f); };
         const handleDrop = async (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) await uploadFile(f); };
@@ -957,6 +957,17 @@ export function getAdminHTML() {
           root.style.setProperty('--input-shadow', theme.inputShadow);
         };
 
+        const updateFavicon = () => {
+          const favicon = settingsForm.value.site_favicon || '/icon/favicon.ico';
+          let link = document.querySelector("link[rel~='icon']");
+          if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+          }
+          link.href = favicon;
+        };
+
         // 自定义下拉组件
         const customSelects = ref({});
         
@@ -1025,7 +1036,7 @@ export function getAdminHTML() {
 
         watch(currentPage, (v) => { localStorage.setItem('adminPage', v); });
         onMounted(() => { check(); document.addEventListener('click', closeAllSelects); });
-        return { logged, username, password, login, logout, posts, editingId, form, coverPreview, toast, openAdd, cancelNewPost, toggleEdit, handleCoverChange, handleCoverDrop, handleDrop, deleteCover, savePost, deletePost, categories, currentPage, postPage, postPageSize, categoryForm, saveCategory, deleteCategory, editCategory, editingCategory, settingsForm, saveSettings, handleFavicon, handleFaviconDrop, handleAvatar, handleAvatarDrop, handleCategoryIcon, handleLinksIcon, handleTagCloudIcon, trashPosts, restorePost, permanentDelete, confirmModal, showConfirm, insertMd, applyTheme, customSelects, toggleSelect, selectOption, getSelectLabel, showImportModal, importFileName, importFileData, importing, importResult, handleImportFile, importPosts, currentPinnedId, setPinnedPost };
+        return { logged, username, password, login, logout, posts, editingId, form, coverPreview, toast, openAdd, cancelNewPost, toggleEdit, handleCoverChange, handleCoverDrop, handleDrop, deleteCover, savePost, deletePost, categories, currentPage, postPage, postPageSize, categoryForm, saveCategory, deleteCategory, editCategory, editingCategory, settingsForm, saveSettings, handleFavicon, handleFaviconDrop, handleAvatar, handleAvatarDrop, handleCategoryIcon, handleLinksIcon, handleTagCloudIcon, trashPosts, restorePost, permanentDelete, confirmModal, showConfirm, insertMd, applyTheme, updateFavicon, customSelects, toggleSelect, selectOption, getSelectLabel, showImportModal, importFileName, importFileData, importing, importResult, handleImportFile, importPosts, currentPinnedId, setPinnedPost };
       }
     }).mount('#app');
   <\/script>
