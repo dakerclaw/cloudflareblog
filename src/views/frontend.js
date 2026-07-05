@@ -304,11 +304,12 @@ export function getFrontendHTML(settings) {
           function stripHtml(str) { return str ? str.split('<').join('').split('>').join('').split('&lt;').join('<').split('&gt;').join('>').split('&amp;').join('&').substring(0, 80) : ''; }
           var rawText = post.excerpt || post.content || '';
           var excerpt = post.password ? '🔒 该文章受到密码保护' : stripHtml(rawText) + (rawText.length > 80 ? '...' : '');
-          var pinBadge = isPinned ? '<img src="/icon/pin-post.png" style="width:18px;height:18px;vertical-align:middle;margin-right:6px">' : '';
-          return '<article class="post-card"' + (isPinned ? ' style="border:2px solid #ffd700;box-shadow:0 4px 16px rgba(255,215,0,0.3)"' : '') + '>' +
+          var pinBadge = isPinned ? '<img src="/icon/pin-post.png" style="position:absolute;top:12px;right:12px;width:28px;height:28px;z-index:1">' : '';
+          return '<article class="post-card" style="position:relative' + (isPinned ? ';border:2px solid #ffd700;box-shadow:0 4px 16px rgba(255,215,0,0.3)' : '') + '">' +
             '<div class="post-cover">' + cover + '</div>' +
+            pinBadge +
             '<div class="post-content">' +
-              '<h2>' + pinBadge + '<a href="/post/' + formatDate(post.created_at) + '/' + post.id + '">' + post.title + '</a></h2>' +
+              '<h2><a href="/post/' + formatDate(post.created_at) + '/' + post.id + '">' + post.title + '</a></h2>' +
               '<p style="color:#725d42;font-size:0.9em;line-height:1.7;margin:8px 0">' + excerpt + '</p>' +
               (tags ? '<div style="margin:8px 0 0">' + tags + '</div>' : '') +
               '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">' +
