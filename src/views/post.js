@@ -72,6 +72,8 @@ export function getPostHTML(post, settings) {
     .post-article p { margin: 0.8em 0; line-height: 1.8; }
     .post-article img { max-width: 100%; height: auto; margin: 1em 0; border-radius: 12px; cursor: zoom-in; }
     .post-article img:hover { transform: scale(1.02); transition: transform 0.2s; }
+    .icon-img { cursor: default !important; pointer-events: none; }
+    .icon-img:hover { transform: none !important; }
     .post-meta { color: #9f927d; font-size: 0.85em; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #e8e0cc; font-weight: 600; }
     .post-meta span { margin-right: 16px; }
     .back-link { display: inline-block; margin-bottom: 20px; padding: 10px 24px; background: #19c8b9; color: #fff; text-decoration: none; border-radius: 50px; font-weight: 600; font-size: 0.9em; box-shadow: 0 4px 0 0 #11a89b; transition: all 0.25s; }
@@ -158,9 +160,9 @@ export function getPostHTML(post, settings) {
       ` : ''}
       <a class="back-link" href="/">← 返回首页</a>
       <article class="post-article">
-        <h1>${escapeHtml(post.title)}</h1>
+        <h1>${settings.pinned_post_id && String(post.id) === String(settings.pinned_post_id) ? '<img src="/icon/pin-post.png" class="icon-img" style="width:24px;height:24px;vertical-align:middle;margin-right:8px">' : ''}${escapeHtml(post.title)}</h1>
         <div class="post-meta">
-          <span><img src="/icon/category.png" style="width:18px;height:18px;vertical-align:middle;margin-right:6px">${escapeHtml(post.category)}</span>
+          <span><img src="/icon/category.png" class="icon-img" style="width:18px;height:18px;vertical-align:middle;margin-right:6px">${escapeHtml(post.category)}</span>
           <span>${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(post.created_at))}</span>
         </div>
         <div id="post-content" style="line-height:1.8"></div>

@@ -511,17 +511,22 @@ export function getAdminHTML() {
                     <span style="color:#9f927d;font-size:13px">替换 <code style="background:#f0e8d8;padding:2px 6px;border-radius:4px;font-size:12px">public/icon/favicon.ico</code> 文件即可更换</span>
                   </div>
                 </div>
+                <div class="form-group"><label>置顶文章编号（留空则不置顶）</label><input v-model="settingsForm.pinned_post_id" type="number" min="0" step="1" placeholder="输入单个文章ID" @input="settingsForm.pinned_post_id = settingsForm.pinned_post_id.replace(/[^0-9]/g, '')"></div>
                 <div class="form-group">
                   <label>主题风格</label>
-                  <div class="custom-select" @click.stop>
-                    <div class="custom-select-trigger" :class="{active: customSelects['theme']}" @click="toggleSelect('theme')">{{ settingsForm.site_theme === 'animal-forest' ? '🌲 动物森林' : '🌊 海洋微风' }}</div>
-                    <div class="custom-select-dropdown" :class="{show: customSelects['theme']}">
-                      <div class="custom-select-option" :class="{selected: settingsForm.site_theme==='animal-forest'}" @click="selectOption('theme', 'animal-forest', 'theme');applyTheme()">🌲 动物森林</div>
-                      <div class="custom-select-option" :class="{selected: settingsForm.site_theme==='ocean-breeze'}" @click="selectOption('theme', 'ocean-breeze', 'theme');applyTheme()">🌊 海洋微风</div>
-                    </div>
+                  <div class="radio-group">
+                    <label class="radio-item">
+                      <input type="radio" value="animal-forest" v-model="settingsForm.site_theme" @change="applyTheme()">
+                      <span class="radio-custom"></span>
+                      <span class="radio-label">🌲 动物森林</span>
+                    </label>
+                    <label class="radio-item">
+                      <input type="radio" value="ocean-breeze" v-model="settingsForm.site_theme" @change="applyTheme()">
+                      <span class="radio-custom"></span>
+                      <span class="radio-label">🌊 海洋微风</span>
+                    </label>
                   </div>
                 </div>
-                <div class="form-group"><label>置顶文章编号（留空则不置顶）</label><input v-model="settingsForm.pinned_post_id" type="number" min="0" step="1" placeholder="输入单个文章ID" @input="settingsForm.pinned_post_id = settingsForm.pinned_post_id.replace(/[^0-9]/g, '')"></div>
                 <div class="form-group"><label>网站页脚（HTML）</label><textarea v-model="settingsForm.site_footer" rows="3"></textarea></div>
                 <div class="form-group"><label>自定义JS</label><textarea v-model="settingsForm.custom_js" rows="4" placeholder="请输入完整的 <script>...</script> 标签，例如：&#10;<script src=&quot;https://cdn.jsdelivr.net/npm/xxx.js&quot;></script>"></textarea></div>
               </div>
