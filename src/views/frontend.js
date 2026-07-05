@@ -129,9 +129,9 @@ export function getFrontendHTML(settings) {
           <div>建站时间：<span id="site-created">${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}</span></div>
           <div>最后更新：<span id="site-updated">-</span></div>
         </div>
-        <h4><img src="/icon/category.png" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">分类</h4>
+        <h4><img src="/icon/category.png" style="width:22px;height:22px;vertical-align:middle;margin-right:6px">分类</h4>
         <div id="category-list" class="category-list"></div>
-        <h4><img src="/icon/friend-links.png" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">${escapeHtml(settings.links_title || '友链')}</h4>
+        <h4><img src="/icon/friend-links.png" style="width:22px;height:22px;vertical-align:middle;margin-right:6px">${escapeHtml(settings.links_title || '友链')}</h4>
         <div id="link-list" class="link-list"></div>
       </div>
       ${settings.enable_tag_cloud !== '0' && settings.tag_cloud_position === 'left' ? `

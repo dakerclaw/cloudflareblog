@@ -139,9 +139,9 @@ export function getPostHTML(post, settings) {
           <div>建站时间：${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}</div>
           <div>最后更新：<span id="site-updated">-</span></div>
         </div>
-        <h4><img src="/icon/category.png" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">分类</h4>
+        <h4><img src="/icon/category.png" style="width:22px;height:22px;vertical-align:middle;margin-right:6px">分类</h4>
         <div id="category-list" class="category-list"></div>
-        <h4><img src="/icon/friend-links.png" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">${escapeHtml(settings.links_title || '友链')}</h4>
+        <h4><img src="/icon/friend-links.png" style="width:22px;height:22px;vertical-align:middle;margin-right:6px">${escapeHtml(settings.links_title || '友链')}</h4>
         <div id="link-list" class="link-list"></div>
       </div>
       ${settings.enable_tag_cloud !== '0' && settings.tag_cloud_position === 'left' ? `
@@ -160,7 +160,7 @@ export function getPostHTML(post, settings) {
       <article class="post-article">
         <h1>${escapeHtml(post.title)}</h1>
         <div class="post-meta">
-          <span>📂 ${escapeHtml(post.category)}</span>
+          <span><img src="/icon/category.png" style="width:16px;height:16px;vertical-align:middle;margin-right:4px">${escapeHtml(post.category)}</span>
           <span>${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(post.created_at))}</span>
         </div>
         <div id="post-content" style="line-height:1.8"></div>
