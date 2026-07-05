@@ -22,7 +22,7 @@ export function getFrontendHTML(settings) {
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="/">
   <link rel="sitemap" href="/sitemap.xml">
-  ${favicon ? `<link rel="icon" href="${escapeHtml(favicon)}">` : ''}
+  <link rel="icon" href="/icon/favicon.ico">
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="${escapeHtml(siteName)}">
@@ -117,7 +117,7 @@ export function getFrontendHTML(settings) {
   <main>
     <aside class="sidebar" ${settings.profile_position === 'right' ? 'style="order:2"' : ''}>
       <div class="profile-card">
-        ${siteAvatar ? `<img class="avatar" src="${escapeHtml(siteAvatar)}" alt="${escapeHtml(siteAuthor)}">` : `<img class="avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect fill='%23e8e0cc' width='80' height='80'/%3E%3Ctext x='40' y='45' text-anchor='middle' fill='%239f927d' font-size='32'%3E?%3C/text%3E%3C/svg%3E" alt="头像">`}
+        <img class="avatar" src="/icon/profile.png" alt="${escapeHtml(siteAuthor)}">
         <div class="name">${escapeHtml(siteAuthor)}</div>
         ${siteBio ? `<div class="bio">${escapeHtml(siteBio)}</div>` : ''}
         <div class="stats">
@@ -129,9 +129,9 @@ export function getFrontendHTML(settings) {
           <div>建站时间：<span id="site-created">${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}</span></div>
           <div>最后更新：<span id="site-updated">-</span></div>
         </div>
-        <h4>${settings.category_icon ? (settings.category_icon.startsWith('http') || settings.category_icon.startsWith('/images/') ? '<img src="' + escapeHtml(settings.category_icon) + '" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">' : settings.category_icon + ' ') : '📂 '}分类</h4>
+        <h4><img src="/icon/category.png" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">分类</h4>
         <div id="category-list" class="category-list"></div>
-        <h4>${settings.links_icon ? (settings.links_icon.startsWith('http') || settings.links_icon.startsWith('/images/') ? '<img src="' + escapeHtml(settings.links_icon) + '" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">' : settings.links_icon + ' ') : '🔗 '}${escapeHtml(settings.links_title || '友链')}</h4>
+        <h4><img src="/icon/friend-links.png" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">${escapeHtml(settings.links_title || '友链')}</h4>
         <div id="link-list" class="link-list"></div>
       </div>
       ${settings.enable_tag_cloud !== '0' && settings.tag_cloud_position === 'left' ? `

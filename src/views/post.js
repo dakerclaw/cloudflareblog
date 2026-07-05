@@ -20,7 +20,7 @@ export function getPostHTML(post, settings) {
   <meta name="description" content="${escapeHtml(postExcerpt)}">
   <meta name="author" content="${escapeHtml(siteAuthor)}">
   <meta name="robots" content="index, follow">
-  ${favicon ? `<link rel="icon" href="${escapeHtml(favicon)}">` : ''}
+  <link rel="icon" href="/icon/favicon.ico">
   <!-- Open Graph -->
   <meta property="og:type" content="article">
   <link rel="canonical" href="/post/${new Date(post.created_at).getFullYear()}${String(new Date(post.created_at).getMonth()+1).padStart(2,'0')}/${post.id}">
@@ -139,9 +139,9 @@ export function getPostHTML(post, settings) {
           <div>建站时间：${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}</div>
           <div>最后更新：<span id="site-updated">-</span></div>
         </div>
-        <h4>${settings.category_icon ? (settings.category_icon.startsWith('http') || settings.category_icon.startsWith('/images/') ? '<img src="' + escapeHtml(settings.category_icon) + '" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">' : settings.category_icon + ' ') : '📂 '}分类</h4>
+        <h4><img src="/icon/category.png" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">分类</h4>
         <div id="category-list" class="category-list"></div>
-        <h4>${settings.links_icon ? (settings.links_icon.startsWith('http') || settings.links_icon.startsWith('/images/') ? '<img src="' + escapeHtml(settings.links_icon) + '" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">' : settings.links_icon + ' ') : '🔗 '}${escapeHtml(settings.links_title || '友链')}</h4>
+        <h4><img src="/icon/friend-links.png" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">${escapeHtml(settings.links_title || '友链')}</h4>
         <div id="link-list" class="link-list"></div>
       </div>
       ${settings.enable_tag_cloud !== '0' && settings.tag_cloud_position === 'left' ? `
