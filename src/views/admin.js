@@ -49,8 +49,8 @@ export function getAdminHTML() {
     .btn-back:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #4a9a68; }
     .btn-import { background: #e18c6f; box-shadow: 0 4px 0 0 #c47a5e; }
     .btn-import:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #c47a5e; }
-    .btn-pin { background: #b77dee; box-shadow: 0 4px 0 0 #9a5fd6; color: #fff; }
-    .btn-pin:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #9a5fd6; }
+    .btn-pin { background: #FFB74D; box-shadow: 0 4px 0 0 #E8A33D; color: #fff; }
+    .btn-pin:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #E8A33D; }
     /* 美化单选按钮样式 */
     .radio-group { display: flex; gap: 12px; margin-top: 8px; }
     .radio-item { position: relative; display: flex; align-items: center; gap: 8px; cursor: pointer; }
@@ -125,8 +125,8 @@ export function getAdminHTML() {
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .actions { display: flex; gap: 6px; }
     .actions button { padding: 6px 14px; border: none; border-radius: 50px; font-size: 13px; font-weight: 600; cursor: pointer; }
-    .actions .edit, .edit { background: #889df0; color: #fff; box-shadow: 0 3px 0 0 #6b82e0; }
-    .actions .edit:hover, .edit:hover { transform: translateY(-1px); box-shadow: 0 4px 0 0 #6b82e0; }
+    .actions .edit, .edit { background: #A5C8F0; color: #fff; box-shadow: 0 3px 0 0 #8BB0E8; }
+    .actions .edit:hover, .edit:hover { transform: translateY(-1px); box-shadow: 0 4px 0 0 #8BB0E8; }
     .actions .delete, .delete { background: #fc736d; color: #fff; box-shadow: 0 3px 0 0 #e05a54; }
     .actions .delete:hover, .delete:hover { transform: translateY(-1px); box-shadow: 0 4px 0 0 #e05a54; }
     .editor-layout { display: flex; gap: 20px; align-items: stretch; }
@@ -321,8 +321,8 @@ export function getAdminHTML() {
                     <td style="padding:14px 16px;text-align:center;white-space:nowrap"><button class="delete" @click="deletePost(post.id)" style="padding:5px 14px;border:none;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap">删除</button></td>
                     <td style="padding:14px 16px;text-align:center;white-space:nowrap"><button class="edit" @click="toggleEdit(post)" style="padding:5px 14px;border:none;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap">编辑</button></td>
                     <td style="padding:14px 16px;text-align:center;white-space:nowrap">
-                      <button v-if="currentPinnedId == post.id" class="btn-pin" @click="setPinnedPost(post.id)" style="padding:5px 12px;border:none;border-radius:50px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">取消置顶</button>
-                      <button v-else class="btn-pin" @click="setPinnedPost(post.id)" :disabled="currentPinnedId && currentPinnedId != post.id" :style="{opacity: currentPinnedId && currentPinnedId != post.id ? 0.4 : 1, cursor: currentPinnedId && currentPinnedId != post.id ? 'not-allowed' : 'pointer'}" style="padding:5px 12px;border:none;border-radius:50px;font-size:12px;font-weight:600;white-space:nowrap">置顶文章</button>
+                      <button v-if="currentPinnedId == post.id" class="btn-pin" @click.stop="setPinnedPost(post.id)" style="padding:5px 12px;border:none;border-radius:50px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">取消置顶</button>
+                      <button v-else class="btn-pin" @click.stop="setPinnedPost(post.id)" :disabled="currentPinnedId && currentPinnedId != post.id" :style="{opacity: currentPinnedId && currentPinnedId != post.id ? 0.4 : 1, cursor: currentPinnedId && currentPinnedId != post.id ? 'not-allowed' : 'pointer'}" style="padding:5px 12px;border:none;border-radius:50px;font-size:12px;font-weight:600;white-space:nowrap">置顶文章</button>
                     </td>
                     <td style="padding:14px 16px;text-align:center;color:#9f927d;font-size:14px">#{{post.id}}</td>
                     <td style="padding:14px 16px;color:#794f27;font-weight:600;font-size:16px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
@@ -732,8 +732,8 @@ export function getAdminHTML() {
             <label for="confirmCheckbox" style="cursor:pointer;color:#725d42;font-size:14px">{{confirmModal.checkboxLabel}}</label>
           </div>
           <div style="display:flex;gap:12px;justify-content:center">
-            <button class="btn btn-cancel" @click="confirmModal.onCancel()">取消</button>
-            <button class="btn" @click="confirmModal.onConfirm(confirmModal.checkboxValue)">确认</button>
+            <button class="btn btn-cancel" @click="confirmModal.onCancel && confirmModal.onCancel()">取消</button>
+            <button class="btn" @click="confirmModal.onConfirm && confirmModal.onConfirm(confirmModal.checkboxValue)">确认</button>
           </div>
         </div>
       </div>
@@ -877,32 +877,32 @@ export function getAdminHTML() {
 
         // 置顶文章方法
         const setPinnedPost = async (postId) => {
-          // 如果点击的是已置顶的文章，则为取消置顶
-          if (currentPinnedId.value == postId) {
-            const post = posts.value.find(p => p.id == postId);
-            const postTitle = post ? post.title : '未知文章';
-            const { confirmed } = await showConfirm('取消置顶', '确定取消置顶文章？<br><br>文章编号：' + postId + '<br>文章标题：' + postTitle);
-            if (!confirmed) return;
-            try {
+          console.log('[setPinnedPost] clicked, postId:', postId);
+          try {
+            // 如果点击的是已置顶的文章，则为取消置顶
+            if (currentPinnedId.value == postId) {
+              const post = posts.value.find(p => p.id == postId);
+              const postTitle = post ? post.title : '未知文章';
+              const { confirmed } = await showConfirm('取消置顶', '确定取消置顶文章？<br><br>文章编号：' + postId + '<br>文章标题：' + postTitle);
+              if (!confirmed) return;
               await api('/api/settings', { method: 'POST', data: { pinned_post_id: '' } });
               currentPinnedId.value = '';
               showToast('已取消置顶');
-            } catch (e) {
-              showToast('操作失败');
+              return;
             }
-            return;
-          }
-          
-          // 置顶文章
-          const post = posts.value.find(p => p.id == postId);
-          if (!post) return;
-          
-          const { confirmed } = await showConfirm('置顶文章', '确定置顶文章？<br><br>文章编号：' + postId + '<br>文章标题：' + post.title);
-          if (!confirmed) return;
-          
-          try {
-            await api('/api/settings', { method: 'POST', data: { pinned_post_id: postId } });
-            currentPinnedId.value = postId;
+            
+            // 置顶文章
+            const post = posts.value.find(p => p.id == postId);
+            if (!post) {
+              showToast('文章不存在');
+              return;
+            }
+            
+            const { confirmed } = await showConfirm('置顶文章', '确定置顶文章？<br><br>文章编号：' + postId + '<br>文章标题：' + post.title);
+            if (!confirmed) return;
+            
+            await api('/api/settings', { method: 'POST', data: { pinned_post_id: String(postId) } });
+            currentPinnedId.value = String(postId);
             // 将置顶文章移到列表最前面
             const pinnedIndex = posts.value.findIndex(p => p.id == postId);
             if (pinnedIndex > 0) {
@@ -911,7 +911,8 @@ export function getAdminHTML() {
             }
             showToast('置顶成功');
           } catch (e) {
-            showToast('置顶失败');
+            console.error('[setPinnedPost] error:', e);
+            showToast('操作失败: ' + (e.message || '未知错误'));
           }
         };
 
