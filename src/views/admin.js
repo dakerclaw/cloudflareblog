@@ -26,17 +26,17 @@ export function getAdminHTML() {
     .admin-layout { display: flex; min-height: 100vh; }
     .sidebar { width: 240px; background: var(--sidebar-bg, #8ac68a); color: #fff; flex-shrink: 0; }
     .sidebar-header { padding: 24px 20px; text-align: center; border-bottom: 2px solid rgba(255,255,255,0.2); }
-    .sidebar-header h1 { font-size: 18px; }
+    .sidebar-header h1 { font-size: 20px; display: flex; align-items: center; justify-content: center; }
     .sidebar-menu { padding: 16px 12px; }
-    .sidebar-menu a { display: block; padding: 12px 16px; color: rgba(255,255,255,0.85); text-decoration: none; border-radius: 12px; font-weight: 600; margin-bottom: 4px; transition: all 0.25s ease; }
+    .sidebar-menu a { display: flex; align-items: center; justify-content: center; padding: 14px 16px; color: rgba(255,255,255,0.85); text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; margin-bottom: 6px; transition: all 0.25s ease; }
     .sidebar-menu a:hover { background: #d6dff0; color: #fff; }
     .sidebar-menu a.active { background: #B7C6E5; color: #fff; box-shadow: 0 3px 0 0 #9aaed4; }
-    .sidebar-menu a .nav-icon { display: inline-block; margin-right: 8px; width: 14px; height: 14px; vertical-align: middle; }
-    .sidebar-menu a .nav-icon img { width: 100%; height: 100%; vertical-align: middle; }
-    .sidebar-header-icon { width: 20px; height: 20px; vertical-align: middle; margin-right: 8px; }
-    .sidebar-footer-icon { width: 16px; height: 16px; vertical-align: middle; margin-right: 6px; }
+    .sidebar-menu a .nav-icon { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; margin-right: 10px; }
+    .sidebar-menu a .nav-icon img { width: 100%; height: 100%; }
+    .sidebar-header-icon { width: 24px; height: 24px; margin-right: 10px; }
+    .sidebar-footer-icon { width: 18px; height: 18px; margin-right: 8px; }
     .sidebar-footer { padding: 16px 20px; border-top: 2px solid rgba(255,255,255,0.2); }
-    .sidebar-footer button { width: 100%; padding: 10px; background: rgba(255,255,255,0.2); color: #fff; border: none; border-radius: 50px; cursor: pointer; }
+    .sidebar-footer button { width: 100%; padding: 10px; background: rgba(255,255,255,0.2); color: #fff; border: none; border-radius: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; }
     .main-content { flex: 1; padding: 30px; }
     .page-header { margin-bottom: 24px; }
     .page-header h2 { color: #794f27; font-size: 1.5em; }
